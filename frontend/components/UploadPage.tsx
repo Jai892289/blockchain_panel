@@ -43,16 +43,53 @@ export default function UploadPages() {
 
 const router = useRouter();
 
-const handleSubmit = () => {
-  setStatus("processing");
+const handleSubmit = async () => {
+  if (!file) return;
 
-  setTimeout(() => {
+  try {
+    setStatus("processing");
+
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    const response = await fetch(
+      "http://localhost:5001/api/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await response.json();
+
+    console.log(data);
+
+    // SAVE DATA
+    localStorage.setItem(
+      "uploadedData",
+      JSON.stringify(data)
+    );
+
     setStatus("done");
 
-    // 👉 Navigate to match page
     router.push("/dashboard/match");
-  }, 3000);
+
+  } catch (error) {
+    console.log(error);
+  }
 };
+
+// const handleSubmit = () => {
+//   setStatus("processing");
+
+//   setTimeout(() => {
+//     setStatus("done");
+
+//     // 👉 Navigate to match page
+//     router.push("/dashboard/match");
+//   }, 3000);
+// };
 
 
   return (

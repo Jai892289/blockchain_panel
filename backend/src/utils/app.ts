@@ -4,7 +4,8 @@ import dotenv from "dotenv";
 import passport from "passport";
 import "../config/passport"
 import authRoutes from "../routes/auth.route"
-
+import uploadRoutes from "../routes/upload.route";
+import matchRoutes from "../routes/match.route";
 dotenv.config();
 
 const app = express();
@@ -24,6 +25,8 @@ app.get("/health", (_, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api", uploadRoutes);
+app.use("/api", matchRoutes);
 
 
 export default app;

@@ -57,16 +57,6 @@ export default function Header() {
           {/* THEME */}
           <ThemeToggle />
 
-          {/* NOTIFICATION */}
-          <div className="relative">
-            <button className="w-9 h-9 flex items-center justify-center cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-slate-800">
-              🔔
-            </button>
-
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 rounded-full">
-              5
-            </span>
-          </div>
         </div>
 
         {/* AVATAR + DROPDOWN */}
