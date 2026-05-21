@@ -409,7 +409,7 @@ export default function ReportPage() {
       try {
 
         const response = await fetch(
-          "http://localhost:5001/api/match-report"
+          "https://blockchain-panel.onrender.com/api/match-report"
         );
 
         const data = await response.json();

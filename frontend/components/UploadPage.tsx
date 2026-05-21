@@ -54,7 +54,7 @@ const handleSubmit = async () => {
     formData.append("file", file);
 
     const response = await fetch(
-      "http://localhost:5001/api/upload",
+      "https://blockchain-panel.onrender.com/api/upload",
       {
         method: "POST",
         body: formData,
