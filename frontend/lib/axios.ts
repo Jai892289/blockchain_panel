@@ -5,14 +5,16 @@ const api = axios.create({
   withCredentials: true,
 });
 
-console.log(process.env.NEXT_PUBLIC_API_BASE_URL);
-
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
+    if (
+      typeof window !== "undefined" &&
+      err.response?.status === 401
+    ) {
       window.location.href = "/login";
     }
+
     return Promise.reject(err);
   }
 );
