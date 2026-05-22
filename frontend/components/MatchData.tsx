@@ -228,7 +228,7 @@ export default function MatchDataFlow() {
 
   return (
 
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col p-4 bg-[var(--background)]">
 
       {/* MAIN CARD */}
       <div className="bg-[var(--card)] border border-[var(--border)] rounded-[30px] w-full p-10">

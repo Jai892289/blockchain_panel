@@ -8,6 +8,14 @@ import {
   Phone,
   User,
   CheckCircle,
+  Shield,
+  CalendarDays,
+  BadgeCheck,
+  Pencil,
+  Save,
+  Clock3,
+  KeyRound,
+  IdCard,
 } from "lucide-react";
 
 export default function ProfilePage() {
@@ -66,8 +74,6 @@ export default function ProfilePage() {
 
         const result =
           await response.json();
-
-        console.log(result);
 
         const user = result.user;
 
@@ -150,7 +156,7 @@ export default function ProfilePage() {
       const token =
         localStorage.getItem("token");
 
-      const response = await fetch(
+      await fetch(
         `${API_URL}/auth/update-profile`,
         {
           method: "PUT",
@@ -195,11 +201,6 @@ export default function ProfilePage() {
         }
       );
 
-      const result =
-        await response.json();
-
-      console.log(result);
-
       setIsEditing(false);
 
       alert(
@@ -222,7 +223,7 @@ export default function ProfilePage() {
 
       <div className="flex items-center justify-center h-[400px]">
 
-        <p className="text-gray-500">
+        <p className="text-gray-500 text-sm">
           Loading Profile...
         </p>
 
@@ -232,18 +233,19 @@ export default function ProfilePage() {
 
   return (
 
-    <div className="w-full space-y-6">
+    <div className="w-full space-y-6 p-4 bg-[var(--background)] min-h-screen">
 
-      {/* HEADER */}
-      <div className="flex justify-between items-center">
+      {/* ================================= HEADER ================================= */}
+
+      <div className="flex justify-between items-start flex-wrap gap-4">
 
         <div>
 
-          <h1 className="text-xl font-semibold text-[var(--foreground)]">
+          <h1 className="text-[28px] font-bold text-[var(--foreground)]">
             Profile
           </h1>
 
-          <p className="text-gray-500 text-sm">
+          <p className="text-[14px] text-[var(--foreground)]/60 mt-1">
             Manage your organization details and settings
           </p>
 
@@ -255,95 +257,151 @@ export default function ProfilePage() {
             onClick={() =>
               setIsEditing(true)
             }
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm cursor-pointer"
+            className="
+              h-11 px-5
+              rounded-xl
+              bg-[#2563eb]
+              hover:bg-[#1d4ed8]
+              text-white
+              text-sm
+              font-medium
+              flex items-center gap-2
+              shadow-md
+              transition-all
+              cursor-pointer
+            "
           >
-            ✏️ Edit Profile
+            <Pencil size={16} />
+            Edit Profile
           </button>
 
         ) : (
 
           <button
             onClick={handleSave}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm cursor-pointer"
+            className="
+              h-11 px-5
+              rounded-xl
+              bg-green-600
+              hover:bg-green-700
+              text-white
+              text-sm
+              font-medium
+              flex items-center gap-2
+              shadow-md
+              transition-all
+              cursor-pointer
+            "
           >
-            💾 Save
+            <Save size={16} />
+            Save
           </button>
         )}
       </div>
 
-      {/* ORGANIZATION */}
+      {/* ================================= ORGANIZATION ================================= */}
+
       <div
         className="
-        bg-[var(--card)]
-        border border-[var(--border)]
-        rounded-[20px]
-        p-6
-        flex justify-between
-      "
+          bg-[var(--card)]
+          border border-[var(--border)]
+          rounded-[34px]
+          p-8
+          flex justify-between
+          gap-10
+          shadow-sm
+        "
       >
 
-        <div className="grid grid-cols-2 gap-6 w-full">
+        {/* LEFT */}
+        <div className="flex-1">
 
-          <Field
-            label="Organization Name"
-            value={data.orgName}
-            editing={isEditing}
-            onChange={(v: string) =>
-              handleChange("orgName", v)
-            }
-          />
+          <div className="mb-8">
 
-          <Field
-            label="Organization ID"
-            value={data.orgId}
-            editing={isEditing}
-            onChange={(v: string) =>
-              handleChange("orgId", v)
-            }
-          />
+            <h2 className="text-[18px] font-semibold text-[#2563eb]">
+              Organization Details
+            </h2>
 
-          <Field
-            label="Registration Date"
-            value={data.regDate}
-            editing={isEditing}
-            onChange={(v: string) =>
-              handleChange("regDate", v)
-            }
-          />
-
-          <div>
-
-            <p className="text-sm text-gray-500">
-              Status
+            <p className="text-[14px] text-[var(--foreground)]/60 mt-1">
+              Your registered organization information
             </p>
 
-            <span
-              className="
-              inline-flex items-center gap-1
-              bg-green-100 text-green-600
-              dark:bg-green-900/20
-              dark:text-green-400
-              px-2 py-1 rounded-full text-xs mt-1
-            "
-            >
+          </div>
 
-              <CheckCircle size={14} />
+          <div className="grid grid-cols-2 gap-x-12 gap-y-7">
 
-              {data.status}
+            <Field
+              icon={<Building2 size={16} />}
+              label="Organization Name"
+              value={data.orgName}
+              editing={isEditing}
+              onChange={(v: string) =>
+                handleChange("orgName", v)
+              }
+            />
 
-            </span>
+            <Field
+              icon={<IdCard size={16} />}
+              label="Organization ID"
+              value={data.orgId}
+              editing={isEditing}
+              onChange={(v: string) =>
+                handleChange("orgId", v)
+              }
+            />
+
+            <Field
+              icon={<CalendarDays size={16} />}
+              label="Registration Date"
+              value={data.regDate}
+              editing={isEditing}
+              onChange={(v: string) =>
+                handleChange("regDate", v)
+              }
+            />
+
+            <div>
+
+              <div className="flex items-center gap-2 text-[13px] text-[var(--foreground)]/55 mb-2">
+                <BadgeCheck size={15} />
+                Status
+              </div>
+
+              <span
+                className="
+                  inline-flex items-center gap-2
+                  bg-green-100
+                  text-green-700
+                  dark:bg-green-900/20
+                  dark:text-green-400
+                  px-3 py-1.5
+                  rounded-full
+                  text-xs
+                  font-medium
+                "
+              >
+
+                <CheckCircle size={13} />
+
+                {data.status || "Active"}
+
+              </span>
+            </div>
 
           </div>
         </div>
 
-        <div className="ml-6 flex items-center">
+        {/* RIGHT */}
+        <div className="flex items-start justify-end">
 
           <div
             className="
-            w-16 h-16 rounded-full
-            overflow-hidden
-            border
-          "
+              w-20 h-20
+              rounded-full
+              bg-blue-100
+              dark:bg-blue-900/20
+              flex items-center justify-center
+            "
           >
 
             {data.profileImage ? (
@@ -351,43 +409,40 @@ export default function ProfilePage() {
               <img
                 src={data.profileImage}
                 alt="profile"
-                className="w-full h-full object-cover"
+                className="w-full h-full rounded-full object-cover"
               />
 
             ) : (
 
-              <div
-                className="
-                w-full h-full
-                bg-blue-100
-                flex items-center justify-center
-              "
-              >
-
-                <Building2 className="text-blue-600" />
-
-              </div>
+              <Building2
+                size={38}
+                className="text-[#2563eb]"
+              />
             )}
 
           </div>
         </div>
       </div>
 
-      {/* LICENSE */}
+      {/* ================================= LICENSE ================================= */}
+
       <div
         className="
-        bg-blue-50 dark:bg-blue-900/10
-        border border-blue-200 dark:border-blue-800/40
-        rounded-[20px]
-        p-6
-      "
+          bg-[#eff6ff]
+          dark:bg-blue-900/10
+          border border-[#bfdbfe]
+          dark:border-blue-800/30
+          rounded-[34px]
+          p-8
+          shadow-sm
+        "
       >
 
-        <h2 className="font-semibold text-blue-700 dark:text-blue-300 mb-4">
+        <h2 className="text-[18px] font-semibold text-[#1d4ed8] mb-7">
           License Information
         </h2>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-3 gap-8">
 
           <Field
             label="License Type"
@@ -421,81 +476,115 @@ export default function ProfilePage() {
 
         </div>
 
+        {/* ACTIVE BOX */}
         <div
           className="
-          mt-4 
-          bg-[var(--card)]
-          border border-[var(--border)]
-          rounded-lg 
-          p-4 
-          text-green-600 dark:text-green-400 
-          text-sm 
-          flex items-center gap-2
-        "
+            mt-7
+            bg-[var(--card)]
+            border border-[#bfdbfe]
+            dark:border-blue-800/30
+            rounded-2xl
+            px-5 py-4
+            flex items-center gap-3
+            text-[15px]
+            text-[var(--foreground)]
+          "
         >
-
-          <CheckCircle size={16} />
-
-          Your license is active and valid
-
-        </div>
-      </div>
-
-      {/* CONTACT */}
-      <div
-        className="
-        bg-[var(--card)]
-        border border-[var(--border)]
-        rounded-[20px]
-        p-6
-      "
-      >
-
-        <h2 className="font-semibold mb-4 text-[var(--foreground)]">
-          Key Contact Person
-        </h2>
-
-        <div className="flex items-center gap-4 mb-4">
 
           <div
             className="
-            w-14 h-14 rounded-full
-            bg-blue-100 dark:bg-blue-900/20
-            flex items-center justify-center
-          "
+              w-7 h-7
+              rounded-full
+              bg-green-100
+              dark:bg-green-900/20
+              flex items-center justify-center
+            "
+          >
+            <CheckCircle
+              size={16}
+              className="text-green-600"
+            />
+          </div>
+
+          Your license is active and valid
+        </div>
+      </div>
+
+      {/* ================================= CONTACT ================================= */}
+
+      <div
+        className="
+          bg-[var(--card)]
+          border border-[var(--border)]
+          rounded-[34px]
+          p-8
+          shadow-sm
+        "
+      >
+
+        <div className="mb-7">
+
+          <h2 className="text-[18px] font-semibold text-[#2563eb]">
+            Key Contact Person
+          </h2>
+
+          <p className="text-[14px] text-[var(--foreground)]/60 mt-1">
+            Primary point of contact for this organization
+          </p>
+
+        </div>
+
+        {/* PROFILE */}
+        <div className="flex items-center gap-5 mb-8">
+
+          <div
+            className="
+              w-18 h-18
+              min-w-[72px]
+              rounded-full
+              bg-blue-100
+              dark:bg-blue-900/20
+              flex items-center justify-center
+            "
           >
 
-            <User className="text-blue-600 dark:text-blue-400" />
+            <User
+              size={34}
+              className="text-[#2563eb]"
+            />
 
           </div>
 
-          <div className="w-full">
+          <div>
 
             <Field
-              label="Name"
+              label=""
               value={data.name}
               editing={isEditing}
               onChange={(v: string) =>
                 handleChange("name", v)
               }
+              big
             />
 
             <Field
-              label="Role"
+              label=""
               value={data.role}
               editing={isEditing}
               onChange={(v: string) =>
                 handleChange("role", v)
               }
+              small
             />
 
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        {/* CONTACT GRID */}
+        <div className="grid grid-cols-2 gap-5">
 
           <ContactField
-            icon={<Mail />}
+            icon={<Mail size={20} />}
             label="Email"
             value={data.email}
             editing={isEditing}
@@ -505,7 +594,7 @@ export default function ProfilePage() {
           />
 
           <ContactField
-            icon={<Phone />}
+            icon={<Phone size={20} />}
             label="Phone"
             value={data.phone}
             editing={isEditing}
@@ -517,31 +606,54 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* SECURITY */}
+      {/* ================================= SECURITY ================================= */}
+
       <div
         className="
-        bg-[var(--card)]
-        border border-[var(--border)]
-        rounded-[20px]
-        p-6 space-y-4
-      "
+          bg-[var(--card)]
+          border border-[var(--border)]
+          rounded-[34px]
+          p-8
+          shadow-sm
+        "
       >
 
-        <Setting
-          title="Two-Factor Authentication"
-          status="Enabled"
-        />
+        <div className="mb-6">
 
-        <Setting
-          title="API Access"
-          button="Configure"
-        />
+          <h2 className="text-[18px] font-semibold text-[var(--foreground)]">
+            Security Settings
+          </h2>
 
-        <Setting
-          title="Session Timeout"
-          value="30 minutes"
-        />
+          <p className="text-[14px] text-[var(--foreground)]/60 mt-1">
+            Manage your security preferences
+          </p>
 
+        </div>
+
+        <div className="space-y-4">
+
+          <Setting
+            icon={<Shield size={20} />}
+            title="Two-Factor Authentication"
+            subtitle="Add an extra layer of security"
+            status="Enabled"
+          />
+
+          <Setting
+            icon={<KeyRound size={20} />}
+            title="API Access"
+            subtitle="Manage API keys and tokens"
+            button="Configure"
+          />
+
+          <Setting
+            icon={<Clock3 size={20} />}
+            title="Session Timeout"
+            subtitle="Automatic logout after inactivity"
+            value="30 minutes"
+          />
+
+        </div>
       </div>
     </div>
   );
@@ -552,19 +664,29 @@ export default function ProfilePage() {
 ========================================= */
 
 function Field({
+  icon,
   label,
   value,
   editing,
   onChange,
+  big,
+  small,
 }: any) {
 
   return (
 
     <div>
 
-      <p className="text-sm text-gray-500 mt-4">
-        {label}
-      </p>
+      {label && (
+
+        <div className="flex items-center gap-2 text-[13px] text-[var(--foreground)]/55 mb-2">
+
+          {icon}
+
+          {label}
+
+        </div>
+      )}
 
       {editing ? (
 
@@ -574,17 +696,30 @@ function Field({
             onChange?.(e.target.value)
           }
           className="
-            mt-1 w-full px-3 py-2 rounded-lg 
+            w-full px-4 py-2.5 rounded-xl
             border border-[var(--border)]
             bg-[var(--card)]
             text-[var(--foreground)]
-            focus:outline-none focus:ring-2 focus:ring-blue-500
+            text-sm
+            focus:outline-none
+            focus:ring-2 focus:ring-blue-500
           "
         />
 
       ) : (
 
-        <h3 className="font-medium mt-1 text-[var(--profile-page)]">
+        <h3
+          className={`
+            text-[var(--profile-page)]
+            ${
+              big
+                ? "text-[18px] font-semibold"
+                : small
+                ? "text-[14px] text-[var(--foreground)]/65"
+                : "text-[16px] font-semibold"
+            }
+          `}
+        >
           {value}
         </h3>
       )}
@@ -608,21 +743,21 @@ function ContactField({
 
     <div
       className="
-      flex items-center gap-3 
-      bg-[var(--card)]
-      border border-[var(--border)]
-      rounded-lg 
-      p-4
-    "
+        flex items-center gap-4
+        bg-[var(--background)]
+        border border-[var(--border)]
+        rounded-2xl
+        px-5 py-5
+      "
     >
 
-      <div className="text-gray-400">
+      <div className="text-[#94a3b8]">
         {icon}
       </div>
 
       <div className="w-full">
 
-        <p className="text-xs text-gray-500">
+        <p className="text-[13px] text-[var(--foreground)]/55 mb-1">
           {label}
         </p>
 
@@ -634,15 +769,17 @@ function ContactField({
               onChange?.(e.target.value)
             }
             className="
-              w-full text-sm bg-transparent 
-              border-b border-[var(--border)] 
+              w-full bg-transparent
+              text-sm
+              text-[var(--foreground)]
+              border-b border-[var(--border)]
               focus:outline-none
             "
           />
 
         ) : (
 
-          <p className="text-sm text-[var(--foreground)]">
+          <p className="text-[16px] font-medium text-[var(--foreground)]">
             {value}
           </p>
         )}
@@ -656,7 +793,9 @@ function ContactField({
 ========================================= */
 
 function Setting({
+  icon,
   title,
+  subtitle,
   status,
   button,
   value,
@@ -666,27 +805,48 @@ function Setting({
 
     <div
       className="
-      flex justify-between items-center 
-      bg-[var(--card)]
-      border border-[var(--border)]
-      rounded-lg 
-      p-6
-    "
+        flex justify-between items-center
+        bg-[var(--background)]
+        border border-[var(--border)]
+        rounded-2xl
+        px-5 py-5
+      "
     >
 
-      <p className="font-medium text-[var(--foreground)]">
-        {title}
-      </p>
+      {/* LEFT */}
+      <div className="flex items-center gap-4">
 
+        <div className="text-[#94a3b8]">
+          {icon}
+        </div>
+
+        <div>
+
+          <p className="text-[16px] font-semibold text-[var(--foreground)]">
+            {title}
+          </p>
+
+          <p className="text-[14px] text-[var(--foreground)]/55 mt-1">
+            {subtitle}
+          </p>
+
+        </div>
+      </div>
+
+      {/* RIGHT */}
       {status && (
 
         <span
           className="
-          bg-green-100 text-green-600
-          dark:bg-green-900/20
-          dark:text-green-400
-          px-3 py-1 rounded-full text-xs
-        "
+            bg-green-100
+            text-green-700
+            dark:bg-green-900/20
+            dark:text-green-400
+            px-4 py-1.5
+            rounded-full
+            text-xs
+            font-medium
+          "
         >
           {status}
         </span>
@@ -694,14 +854,25 @@ function Setting({
 
       {button && (
 
-        <button className="border border-[var(--border)] px-4 py-1 rounded-lg text-sm">
+        <button
+          className="
+            border border-[var(--border)]
+            bg-[var(--card)]
+            hover:bg-[var(--background)]
+            px-4 py-2
+            rounded-xl
+            text-sm
+            font-medium
+            transition-all
+          "
+        >
           {button}
         </button>
       )}
 
       {value && (
 
-        <span className="text-sm text-gray-500">
+        <span className="text-[15px] text-[var(--foreground)]/70">
           {value}
         </span>
       )}

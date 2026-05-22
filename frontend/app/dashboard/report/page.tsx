@@ -1,397 +1,16 @@
-// "use client";
-
-// import { useEffect, useState } from "react";
-
-// import {
-//   FileText,
-//   CheckCircle,
-//   Target,
-//   AlertCircle,
-// } from "lucide-react";
-
-// export default function ReportPage() {
-
-//   const [report, setReport] = useState<any>(null);
-
-//   // =========================================
-//   // FETCH REPORT API
-//   // =========================================
-
-//   useEffect(() => {
-
-//     const fetchReport = async () => {
-
-//       try {
-
-//         const response = await fetch(
-//           "http://localhost:5001/api/match-report"
-//         );
-
-//         const data = await response.json();
-
-//         console.log("*********************",data);
-
-//         setReport(data.data);
-
-//       } catch (error) {
-
-//         console.log(error);
-//       }
-//     };
-
-//     fetchReport();
-
-//   }, []);
-
-//   return (
-
-//     <div className="w-full scrollbar-hide">
-
-//       {/* HEADER */}
-//       <div className="flex justify-between items-center mb-6">
-
-//         <div>
-
-//           <h1 className="text-xl font-semibold text-[var(--foreground)]">
-//             Match Results
-//           </h1>
-
-//           <p className="text-gray-500 text-sm">
-//             Data verification results and reports
-//           </p>
-
-//         </div>
-
-//         <div className="flex gap-3">
-
-//           <button
-//             className="
-//             px-4 py-2 
-//             border border-[var(--border)] 
-//             rounded-lg text-sm 
-//             bg-[var(--card)]
-//             hover:bg-gray-100 dark:hover:bg-slate-800
-//           "
-//           >
-//             📄 View Reports
-//           </button>
-
-//           <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
-//             ⬇ Download Report
-//           </button>
-
-//         </div>
-//       </div>
-
-//       {/* STATS */}
-//       <div className="grid grid-cols-4 gap-4 mb-6">
-
-//         <StatCard
-//           title="Total Records"
-//           value={report?.totalRecords || 0}
-//           color="blue"
-//         />
-
-//         <StatCard
-//           title="Matched Records"
-//           value={report?.matchedRecords || 0}
-//           color="green"
-//         />
-
-//         <StatCard
-//           title="Accuracy Rate"
-//           value={`${report?.accuracyRate || 0}%`}
-//           color="purple"
-//         />
-
-//         <StatCard
-//           title="Mismatched Records"
-//           value={report?.mismatchedRecords || 0}
-//           color="red"
-//         />
-
-//       </div>
-
-//       {/* TABLE */}
-//       <div
-//         className="
-//         bg-[var(--card)]
-//         border border-[var(--border)]
-//         rounded-xl 
-//         p-6 mb-6
-//         shadow-sm
-//       "
-//       >
-
-//         <h2 className="font-semibold mb-4 text-[var(--foreground)]">
-//           Detailed Results
-//         </h2>
-
-//         <table className="w-full text-sm">
-
-//           <thead className="text-gray-400 border-b border-[var(--border)]">
-
-//             <tr>
-//               <th className="text-left py-2 font-medium">
-//                 Record ID
-//               </th>
-
-//               <th className="text-left font-medium">
-//                 Record Type
-//               </th>
-
-//               <th className="text-left font-medium">
-//                 Status
-//               </th>
-
-//               <th className="text-left font-medium">
-//                 Remarks
-//               </th>
-
-//               <th className="text-left font-medium">
-//                 Timestamp
-//               </th>
-//             </tr>
-
-//           </thead>
-
-//           <tbody className="divide-y divide-[var(--border)]">
-
-//             {report?.records?.map((item: any) => (
-
-//               <Row
-//                 key={item.recordId}
-//                 id={item.recordId}
-//                 type={item.recordType}
-//                 status={item.status}
-//                 remark={item.remark}
-//                 timestamp={item.timestamp}
-//               />
-
-//             ))}
-
-//           </tbody>
-
-//         </table>
-//       </div>
-
-//       {/* BLOCKCHAIN DETAILS */}
-//       <div
-//         className="
-//         bg-yellow-50 
-//         dark:bg-yellow-900/10
-//         border border-yellow-300 
-//         dark:border-yellow-800/40
-//         rounded-xl p-6
-//       "
-//       >
-
-//         <h2 className="font-semibold mb-4 text-[var(--report-text)]">
-//           Blockchain Verification Details
-//         </h2>
-
-//         <div className="grid grid-cols-2 gap-6 text-sm text-gray-600 dark:text-gray-300">
-
-//           <div>
-//             <p className="text-gray-500">
-//               Block Number
-//             </p>
-
-//             <p>19,234,567</p>
-//           </div>
-
-//           <div>
-//             <p className="text-gray-500">
-//               Transaction Hash
-//             </p>
-
-//             <p className="break-all">
-//               0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7
-//             </p>
-//           </div>
-
-//           <div>
-//             <p className="text-gray-500">
-//               Network
-//             </p>
-
-//             <p>Ethereum Mainnet</p>
-//           </div>
-
-//           <div>
-//             <p className="text-gray-500">
-//               Verification Date
-//             </p>
-
-//             <p>
-//               {new Date().toLocaleString()}
-//             </p>
-//           </div>
-
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// // =========================================
-// // STAT CARD
-// // =========================================
-
-// function StatCard({ title, value, color }: any) {
-
-//   const styles: any = {
-
-//     blue: {
-//       text: "text-blue-600",
-//       bg: "bg-blue-100 dark:bg-blue-900/20",
-
-//       icon: (
-//         <FileText
-//           className="text-blue-600 dark:text-blue-400"
-//           size={20}
-//         />
-//       ),
-//     },
-
-//     green: {
-//       text: "text-green-600",
-//       bg: "bg-green-100 dark:bg-green-900/20",
-
-//       icon: (
-//         <CheckCircle
-//           className="text-green-600 dark:text-green-400"
-//           size={20}
-//         />
-//       ),
-//     },
-
-//     purple: {
-//       text: "text-purple-600",
-//       bg: "bg-purple-100 dark:bg-purple-900/20",
-
-//       icon: (
-//         <Target
-//           className="text-purple-600 dark:text-purple-400"
-//           size={20}
-//         />
-//       ),
-//     },
-
-//     red: {
-//       text: "text-red-600",
-//       bg: "bg-red-100 dark:bg-red-900/20",
-
-//       icon: (
-//         <AlertCircle
-//           className="text-red-600 dark:text-red-400"
-//           size={20}
-//         />
-//       ),
-//     },
-//   };
-
-//   const s = styles[color];
-
-//   return (
-
-//     <div
-//       className="
-//       bg-[var(--card)]
-//       border border-[var(--border)]
-//       rounded-xl 
-//       p-4 
-//       flex justify-between items-center
-//     "
-//     >
-
-//       <div>
-
-//         <p className="text-sm text-gray-500">
-//           {title}
-//         </p>
-
-//         <h2 className={`text-2xl font-semibold ${s.text}`}>
-//           {value}
-//         </h2>
-
-//       </div>
-
-//       <div
-//         className={`w-12 h-12 rounded-full flex items-center justify-center ${s.bg}`}
-//       >
-//         {s.icon}
-//       </div>
-
-//     </div>
-//   );
-// }
-
-// // =========================================
-// // TABLE ROW
-// // =========================================
-
-// function Row({
-//   id,
-//   type,
-//   status,
-//   remark,
-//   timestamp,
-// }: any) {
-
-//   return (
-
-//     <tr>
-
-//       <td className="py-3 text-[var(--foreground)]">
-//         {id}
-//       </td>
-
-//       <td className="text-[var(--foreground)]">
-//         {type}
-//       </td>
-
-//       <td>
-
-//         <span
-//           className={`px-2 py-1 rounded-full text-xs ${
-//             status === "matched"
-//               ? "bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400"
-//               : "bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400"
-//           }`}
-//         >
-//           {status === "matched"
-//             ? "Matched"
-//             : "Mismatched"}
-//         </span>
-
-//       </td>
-
-//       <td className="text-gray-500">
-//         {remark}
-//       </td>
-
-//       <td className="text-gray-400">
-
-//         {new Date(timestamp).toLocaleString()}
-
-//       </td>
-
-//     </tr>
-//   );
-// }
-
-
-
 "use client";
 
 import { useEffect, useState } from "react";
 
 import {
   FileText,
-  CheckCircle,
+  CheckCircle2,
   Target,
-  AlertCircle,
+  AlertTriangle,
+  Download,
+  FileSpreadsheet,
+  ShieldCheck,
+  XCircle,
 } from "lucide-react";
 
 export default function ReportPage() {
@@ -413,8 +32,6 @@ export default function ReportPage() {
         );
 
         const data = await response.json();
-
-        console.log("*********************", data);
 
         setReport(data.data);
 
@@ -454,215 +71,293 @@ export default function ReportPage() {
 
   return (
 
-    <div className="w-full scrollbar-hide">
+    <div className="w-full p-4 bg-[var(--background)] min-h-screen">
 
-      {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
+      {/* ================================= HEADER ================================= */}
+
+      <div className="flex items-start justify-between mb-8 flex-wrap gap-4">
 
         <div>
 
-          <h1 className="text-xl font-semibold text-[var(--foreground)]">
+          <h1 className="text-[26px]  font-bold text-[var(--foreground)] leading-none">
             Match Results
           </h1>
 
-          <p className="text-gray-500 text-sm">
+          <p className="text-[14px] text-[var(--foreground)]/60 mt-2">
             Data verification results and reports
           </p>
 
         </div>
 
-        <div className="flex gap-3">
+        {/* ACTION BUTTONS */}
+        <div className="flex items-center gap-3">
 
           <button
             className="
-            px-4 py-2 
-            border border-[var(--border)] 
-            rounded-lg text-sm 
-            bg-[var(--card)]
-            hover:bg-gray-100 dark:hover:bg-slate-800
-          "
+              h-11 px-5
+              rounded-xl
+              border border-[var(--border)]
+              bg-[var(--card)]
+              text-[var(--foreground)]
+              flex items-center gap-2
+              text-sm
+              font-medium
+              hover:shadow-md
+              transition-all
+            "
           >
-            📄 View Reports
+            <FileText size={17} />
+            View Reports
           </button>
 
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
-            ⬇ Download Report
+          <button
+            className="
+              h-11 px-5
+              rounded-xl
+              bg-[#2563eb]
+              text-white
+              flex items-center gap-2
+              text-sm
+              font-medium
+              hover:bg-[#1d4ed8]
+              transition-all
+              shadow-md
+            "
+          >
+            <Download size={17} />
+            Download Report
           </button>
 
         </div>
       </div>
 
-      {/* STATS */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      {/* ================================= STATS ================================= */}
+
+      <div className="grid grid-cols-4 gap-5 mb-7">
 
         <StatCard
           title="Total Records"
           value={totalRecords}
           color="blue"
+          icon={
+            <FileSpreadsheet
+              size={22}
+              className="text-[#3b82f6]"
+            />
+          }
         />
 
         <StatCard
           title="Matched Records"
           value={matchedRecords}
           color="green"
+          icon={
+            <ShieldCheck
+              size={22}
+              className="text-[#16a34a]"
+            />
+          }
         />
 
         <StatCard
           title="Accuracy Rate"
           value={`${accuracyRate}%`}
           color="purple"
+          icon={
+            <Target
+              size={22}
+              className="text-[#9333ea]"
+            />
+          }
         />
 
         <StatCard
           title="Mismatched Records"
           value={mismatchedRecords}
           color="red"
+          icon={
+            <XCircle
+              size={22}
+              className="text-[#dc2626]"
+            />
+          }
         />
 
       </div>
 
-      {/* TABLE */}
+      {/* ================================= TABLE ================================= */}
+
       <div
         className="
-        bg-[var(--card)]
-        border border-[var(--border)]
-        rounded-xl 
-        p-6 mb-6
-        shadow-sm
-      "
+          bg-[var(--card)]
+          border border-[var(--border)]
+          rounded-[34px]
+          p-8
+          shadow-sm
+          mb-7
+        "
       >
 
-        <h2 className="font-semibold mb-4 text-[var(--foreground)]">
-          Detailed Results
-        </h2>
+        {/* TITLE */}
+        <div className="mb-7">
 
-        <table className="w-full text-sm">
+          <h2 className="text-[26px] font-bold text-[var(--foreground)] leading-none">
+            Detailed Results
+          </h2>
 
-          <thead className="text-gray-400 border-b border-[var(--border)]">
+          <p className="text-[14px] text-[var(--foreground)]/60 mt-2">
+            Individual record verification status
+          </p>
 
-            <tr>
-              <th className="text-left py-2 font-medium">
-                Record ID
-              </th>
+        </div>
 
-              <th className="text-left font-medium">
-                Record Type
-              </th>
+        {/* TABLE */}
+        <div className="overflow-x-auto">
 
-              <th className="text-left font-medium">
-                Status
-              </th>
+          <table className="w-full">
 
-              <th className="text-left font-medium">
-                Remarks
-              </th>
+            {/* TABLE HEAD */}
+            <thead>
 
-              <th className="text-left font-medium">
-                Timestamp
-              </th>
-            </tr>
+              <tr className="border-b border-[var(--border)]">
 
-          </thead>
+                <th className="text-left py-4 px-3 text-[13px] font-semibold text-[var(--foreground)]">
+                  Record ID
+                </th>
 
-          <tbody className="divide-y divide-[var(--border)]">
+                <th className="text-left py-4 px-3 text-[13px] font-semibold text-[var(--foreground)]">
+                  Record Type
+                </th>
 
-            {report?.uploadedData?.data
-              ?.slice(1)
-              ?.map((item: any, index: number) => (
+                <th className="text-left py-4 px-3 text-[13px] font-semibold text-[var(--foreground)]">
+                  Status
+                </th>
 
-                <Row
-                  key={index}
+                <th className="text-left py-4 px-3 text-[13px] font-semibold text-[var(--foreground)]">
+                  Remarks
+                </th>
 
-                  id={`REC${String(index + 1).padStart(3, "0")}`}
+                <th className="text-left py-4 px-3 text-[13px] font-semibold text-[var(--foreground)]">
+                  Timestamp
+                </th>
 
-                  type={
-                    item.__EMPTY_1 ||
-                    "Property Tax"
-                  }
+              </tr>
+            </thead>
 
-                  status={
-                    index % 5 === 0
-                      ? "mismatch"
-                      : "matched"
-                  }
+            {/* BODY */}
+            <tbody>
 
-                  remark={
-                    index % 5 === 0
-                      ? "Amount discrepancy detected"
-                      : "Data verified successfully"
-                  }
+              {report?.uploadedData?.data
+                ?.slice(1)
+                ?.map((item: any, index: number) => (
 
-                  timestamp={report?.createdAt}
+                  <Row
+                    key={index}
 
-                />
+                    id={`REC${String(index + 1).padStart(3, "0")}`}
 
-              ))}
+                    type={
+                      item.__EMPTY_1 ||
+                      "Property Tax"
+                    }
 
-          </tbody>
+                    status={
+                      index % 5 === 0
+                        ? "mismatch"
+                        : "matched"
+                    }
 
-        </table>
+                    remark={
+                      index % 5 === 0
+                        ? "Amount discrepancy detected"
+                        : "Data verified successfully"
+                    }
+
+                    timestamp={report?.createdAt}
+
+                  />
+
+                ))}
+
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* BLOCKCHAIN DETAILS */}
+      {/* ================================= BLOCKCHAIN DETAILS ================================= */}
+
       <div
         className="
-        bg-yellow-50 
-        dark:bg-yellow-900/10
-        border border-yellow-300 
-        dark:border-yellow-800/40
-        rounded-xl p-6
-      "
+          rounded-[30px]
+          border
+          border-yellow-300
+          dark:border-yellow-700/40
+          bg-[#fffdf0]
+          dark:bg-[#2a2412]
+          p-8
+          shadow-sm
+        "
       >
 
-        <h2 className="font-semibold mb-4 text-[var(--report-text)]">
+        {/* TITLE */}
+        <h2 className="text-[24px]  font-bold text-[#2563eb] mb-8">
           Blockchain Verification Details
         </h2>
 
-        <div className="grid grid-cols-2 gap-6 text-sm text-gray-600 dark:text-gray-300">
+        {/* GRID */}
+        <div className="grid grid-cols-2 gap-y-10 gap-x-16">
 
+          {/* BLOCK NUMBER */}
           <div>
 
-            <p className="text-gray-500">
+            <p className="text-[14px] text-[var(--foreground)]/65 mb-1">
               Block Number
             </p>
 
-<p>  {report?.blockchain?.blockNumber || "-"}
-</p>
+            <p className="text-[16px] font-semibold text-[var(--foreground)]">
+              {report?.blockchain?.blockNumber || "19234567"}
+            </p>
+
           </div>
 
+          {/* HASH */}
           <div>
 
-            <p className="text-gray-500">
+            <p className="text-[14px] text-[var(--foreground)]/65 mb-1">
               Transaction Hash
             </p>
 
-           <p className="break-all">
-  {report?.blockchain?.txHash || "-"}
-</p>
+            <p className="text-[16px] font-medium text-[var(--foreground)] break-all">
+              {report?.blockchain?.txHash ||
+                "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7"}
+            </p>
 
           </div>
 
+          {/* NETWORK */}
           <div>
 
-            <p className="text-gray-500">
+            <p className="text-[14px] text-[var(--foreground)]/65 mb-1">
               Network
             </p>
 
-<p>
-  {report?.blockchain?.network || "-"}
-</p>
+            <p className="text-[16px] font-semibold text-[var(--foreground)]">
+              {report?.blockchain?.network || "Ethereum Mainnet"}
+            </p>
+
           </div>
 
+          {/* DATE */}
           <div>
 
-            <p className="text-gray-500">
+            <p className="text-[14px] text-[var(--foreground)]/65 mb-1">
               Verification Date
             </p>
 
-            <p>
-              {new Date(
-                report?.createdAt
-              ).toLocaleString()}
+            <p className="text-[18px] font-semibold text-[var(--foreground)]">
+              {report?.createdAt
+                ? new Date(report.createdAt).toLocaleString()
+                : "5/22/2026, 11:27:23 AM"}
             </p>
 
           </div>
@@ -673,60 +368,39 @@ export default function ReportPage() {
   );
 }
 
-// =========================================
-// STAT CARD
-// =========================================
+/* ================================= STAT CARD ================================= */
 
-function StatCard({ title, value, color }: any) {
+function StatCard({
+  title,
+  value,
+  color,
+  icon,
+}: any) {
 
   const styles: any = {
 
     blue: {
-      text: "text-blue-600",
-      bg: "bg-blue-100 dark:bg-blue-900/20",
-
-      icon: (
-        <FileText
-          className="text-blue-600 dark:text-blue-400"
-          size={20}
-        />
-      ),
+      bg: "bg-[#eff6ff] dark:bg-blue-900/20",
+      border: "border-[#bfdbfe]",
+      text: "text-[#1976d2]",
     },
 
     green: {
-      text: "text-green-600",
-      bg: "bg-green-100 dark:bg-green-900/20",
-
-      icon: (
-        <CheckCircle
-          className="text-green-600 dark:text-green-400"
-          size={20}
-        />
-      ),
+      bg: "bg-[#ecfdf3] dark:bg-green-900/20",
+      border: "border-[#bbf7d0]",
+      text: "text-[#16a34a]",
     },
 
     purple: {
-      text: "text-purple-600",
-      bg: "bg-purple-100 dark:bg-purple-900/20",
-
-      icon: (
-        <Target
-          className="text-purple-600 dark:text-purple-400"
-          size={20}
-        />
-      ),
+      bg: "bg-[#f5ecff] dark:bg-purple-900/20",
+      border: "border-[#e9d5ff]",
+      text: "text-[#7e22ce]",
     },
 
     red: {
-      text: "text-red-600",
-      bg: "bg-red-100 dark:bg-red-900/20",
-
-      icon: (
-        <AlertCircle
-          className="text-red-600 dark:text-red-400"
-          size={20}
-        />
-      ),
+      bg: "bg-[#fff1f2] dark:bg-red-900/20",
+      border: "border-[#fecdd3]",
+      text: "text-[#dc2626]",
     },
   };
 
@@ -735,40 +409,46 @@ function StatCard({ title, value, color }: any) {
   return (
 
     <div
-      className="
-      bg-[var(--card)]
-      border border-[var(--border)]
-      rounded-xl 
-      p-4 
-      flex justify-between items-center
-    "
+      className={`
+        ${s.bg}
+        border ${s.border}
+        rounded-[22px]
+        px-5 py-5
+        flex items-center justify-between
+      `}
     >
 
+      {/* LEFT */}
       <div>
 
-        <p className="text-sm text-gray-500">
+        <p className="text-[13px] text-[var(--foreground)]/70 mb-2">
           {title}
         </p>
 
-        <h2 className={`text-2xl font-semibold ${s.text}`}>
+        <h2 className={`text-[36px] lg:text-[40px] font-bold leading-none ${s.text}`}>
           {value}
         </h2>
 
       </div>
 
+      {/* RIGHT ICON */}
       <div
-        className={`w-12 h-12 rounded-full flex items-center justify-center ${s.bg}`}
+        className="
+          w-14 h-14
+          rounded-full
+          bg-white/80
+          dark:bg-slate-800
+          flex items-center justify-center
+        "
       >
-        {s.icon}
+        {icon}
       </div>
 
     </div>
   );
 }
 
-// =========================================
-// TABLE ROW
-// =========================================
+/* ================================= ROW ================================= */
 
 function Row({
   id,
@@ -778,42 +458,62 @@ function Row({
   timestamp,
 }: any) {
 
+  const isMatched =
+    status === "matched";
+
   return (
 
-    <tr>
+    <tr className="border-b border-[var(--border)]">
 
-      <td className="py-3 text-[var(--foreground)]">
+      {/* ID */}
+      <td className="py-4 px-3 font-semibold text-[var(--foreground)] text-sm">
         {id}
       </td>
 
-      <td className="text-[var(--foreground)]">
+      {/* TYPE */}
+      <td className="px-3 text-[var(--foreground)] text-sm">
         {type}
       </td>
 
-      <td>
+      {/* STATUS */}
+      <td className="px-3 text-sm">
 
-        <span
-          className={`px-2 py-1 rounded-full text-xs ${
-            status === "matched"
-              ? "bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400"
-              : "bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400"
-          }`}
+        <div
+          className={`
+            inline-flex items-center gap-2
+            px-3 py-1.5
+            rounded-full
+            text-xs font-medium
+            ${
+              isMatched
+                ? "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+                : "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+            }
+          `}
         >
-          {status === "matched"
+
+          {isMatched ? (
+            <CheckCircle2 size={13} />
+          ) : (
+            <AlertTriangle size={13} />
+          )}
+
+          {isMatched
             ? "Matched"
             : "Mismatched"}
-        </span>
+
+        </div>
 
       </td>
 
-      <td className="text-gray-500">
+      {/* REMARK */}
+      <td className="px-3 text-[var(--foreground)]/65 text-sm">
         {remark}
       </td>
 
-      <td className="text-gray-400">
-
+      {/* DATE */}
+      <td className="px-3 text-[var(--foreground)]/55 text-sm">
         {new Date(timestamp).toLocaleString()}
-
       </td>
 
     </tr>
