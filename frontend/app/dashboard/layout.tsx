@@ -27,7 +27,7 @@ export default function DashboardLayout({
 
           {/* CONTENT */}
           <div className="
-            flex-1 p-6 
+            flex-1 
             bg-[var(--card)] 
             border border-[var(--border)]
             rounded-b-[30px] 

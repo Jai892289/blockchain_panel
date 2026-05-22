@@ -15,7 +15,7 @@ export default function UploadContainer({ children }: any) {
         <h2 className="text-[20px] font-semibold text-[var(--foreground)]">
           Upload Data
         </h2>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-black">
           Upload your data files for blockchain verification
         </p>
       </div>
