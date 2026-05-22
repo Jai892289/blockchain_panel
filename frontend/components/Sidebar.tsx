@@ -130,9 +130,14 @@ export default function Sidebar({
         {/* TEXT */}
         {collapsed && (
 
-          <span className="text-[15px] font-semibold tracking-wide">
-            WEB23
-          </span>
+         <img
+            src="/dash_logo.png"
+            alt="WEB23 Logo"
+            className="
+              w-35 h-full
+              object-contain
+            "
+          />
         )}
       </div>
 

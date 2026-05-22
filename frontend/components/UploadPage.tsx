@@ -84,9 +84,9 @@ export default function UploadPages() {
     <div className="w-full">
 
       {/* ================= HEADER ================= */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-4">
 
-        <h3 className="text-[32px] font-semibold text-[var(--foreground)]">
+        <h3 className="text-[20px] font-semibold text-[var(--foreground)]">
           File Upload
         </h3>
 
@@ -108,11 +108,11 @@ export default function UploadPages() {
             }
           }}
           className="
-            mt-8
+            mt-4
             border-2 border-dashed border-[#c8d7f0]
             dark:border-slate-600
             rounded-[30px]
-            py-16 px-10
+            p-4
             text-center
             bg-[var(--card)]
             transition-all duration-300
@@ -138,7 +138,7 @@ export default function UploadPages() {
           />
 
           {/* ICON */}
-          <div className="flex justify-center mb-5">
+          <div className="flex justify-center mb-1">
 
             <div
               className="

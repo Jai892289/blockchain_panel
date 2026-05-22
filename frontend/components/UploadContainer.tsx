@@ -21,7 +21,7 @@ export default function UploadContainer({ children }: any) {
       </div>
 
       {/* INNER CARD */}
-      <div className="p-8">
+      <div className="p-4">
         {children}
       </div>
     </div>

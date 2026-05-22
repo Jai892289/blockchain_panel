@@ -10,6 +10,10 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import icon1 from "../../public/icon1.png"
+import icon2 from "../../public/icon2.png"
+import icon3 from "../../public/icon3.png"
+import icon4 from "../../public/icon4.png"
 
 /* ================= DATA ================= */
 
@@ -82,7 +86,7 @@ export default function DashboardPage() {
           sub="2026"
           bg="bg-[#dbeeff]"
           text="text-[#0f5fc2]"
-          icon="📅"
+          icon={icon1}
         />
 
         <Card
@@ -90,7 +94,7 @@ export default function DashboardPage() {
           value="1,247"
           bg="bg-[#daf5d9]"
           text="text-[#109b1c]"
-          icon="📑"
+          icon={icon2}
         />
 
         <Card
@@ -98,7 +102,7 @@ export default function DashboardPage() {
           value="1,189"
           bg="bg-[#ead9ff]"
           text="text-[#7b2cff]"
-          icon="📄"
+          icon={icon3}
         />
 
         <Card
@@ -106,7 +110,7 @@ export default function DashboardPage() {
           value="58"
           bg="bg-[#ffdce3]"
           text="text-[#d61f45]"
-          icon="📋"
+          icon={icon4}
         />
       </div>
 
@@ -255,18 +259,26 @@ function Card({
     >
 
       {/* ICON */}
-      <div
-        className="
-          bg-[var(--card)]
-          w-16 h-16
-          rounded-full
-          flex items-center justify-center
-          text-2xl
-          shadow-sm
-        "
-      >
-        {icon}
-      </div>
+      {/* ICON */}
+<div
+  className="
+    bg-[var(--card)]
+    w-16 h-16
+    rounded-full
+    flex items-center justify-center
+    shadow-sm
+    overflow-hidden
+  "
+>
+  <img
+    src={icon.src}
+    alt="icon"
+    className="
+      w-9 h-9
+      object-contain
+    "
+  />
+</div>
 
       {/* TEXT */}
       <div>
