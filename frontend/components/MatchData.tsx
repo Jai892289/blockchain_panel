@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+
 export default function MatchDataFlow() {
 
   const router = useRouter();
@@ -32,6 +33,9 @@ export default function MatchDataFlow() {
   const [toDate, setToDate] = useState("");
 
   const [format, setFormat] = useState("CSV");
+  const [options, setOptions] = useState<string[]>([]);
+  const [showPreview, setShowPreview] =
+  useState(false);
 
   // =========================================
   // STEPS
@@ -47,15 +51,15 @@ export default function MatchDataFlow() {
   // OPTIONS
   // =========================================
 
-  const options = [
-    "All",
-    "Property ID",
-    "Owner Name",
-    "Address",
-    "Mobile no.",
-    "Property Type",
-    "Plot area",
-  ];
+  // const options = [
+  //   "All",
+  //   "Property ID",
+  //   "Owner Name",
+  //   "Address",
+  //   "Mobile no.",
+  //   "Property Type",
+  //   "Plot area",
+  // ];
 
   // =========================================
   // FORMATS
@@ -72,19 +76,39 @@ export default function MatchDataFlow() {
   // =========================================
 
   useEffect(() => {
+  const stored = localStorage.getItem("uploadedData");
 
-    const stored = localStorage.getItem("uploadedData");
+  if (stored) {
+    const parsed = JSON.parse(stored);
 
-    if (stored) {
+    setUploadedData(parsed);
 
-      const parsed = JSON.parse(stored);
+    // Get column names dynamically
+    const firstRow = parsed?.data?.[0];
 
-      console.log(parsed);
-
-      setUploadedData(parsed);
+    if (firstRow) {
+      setOptions([
+        "All",
+        ...Object.keys(firstRow),
+      ]);
     }
+  }
+}, []);
 
-  }, []);
+  // useEffect(() => {
+
+  //   const stored = localStorage.getItem("uploadedData");
+
+  //   if (stored) {
+
+  //     const parsed = JSON.parse(stored);
+
+  //     console.log(parsed);
+
+  //     setUploadedData(parsed);
+  //   }
+
+  // }, []);
 
   // =========================================
   // CLOSE DROPDOWN OUTSIDE
@@ -151,7 +175,7 @@ export default function MatchDataFlow() {
       console.log(payload);
 
       const response = await fetch(
-        "https://blockchain-panel.onrender.com/api/match",
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/match`,
         {
           method: "POST",
 
@@ -330,10 +354,13 @@ export default function MatchDataFlow() {
                 >
 
                   <span className="text-gray-400 text-sm">
-
                     {selected.length === 0
+  ? "-Please Select-"
+  : selected.join(", ")}
+
+                    {/* {selected.length === 0
                       ? "-Please Select-"
-                      : `${selected.length} selected`}
+                      : `${selected.length} selected`} */}
 
                   </span>
 
@@ -505,7 +532,20 @@ export default function MatchDataFlow() {
 
                 } else {
 
-                  setStep((s) => s + 1);
+                  if (step === 1) {
+  if (selected.length === 0) {
+    alert(
+      "Please select at least one field"
+    );
+    return;
+  }
+
+  setShowPreview(true);
+} else {
+  setStep((s) => s + 1);
+}
+
+                  // setStep((s) => s + 1);
                 }
               }}
               className="w-62 py-3 bg-blue-600 text-white rounded-lg cursor-pointer"
@@ -516,6 +556,344 @@ export default function MatchDataFlow() {
           </div>
         </div>
       </div>
+{showPreview && (
+  <PreviewModal
+    selected={selected}
+    uploadedData={uploadedData}
+    onClose={() =>
+      setShowPreview(false)
+    }
+    onConfirm={() => {
+      setShowPreview(false);
+      setStep(2);
+    }}
+  />
+)}
+      
+
+    </div>
+  );
+}
+
+function PreviewModal({
+  selected,
+  uploadedData,
+  onClose,
+  onConfirm,
+}: any) {
+  const previewRows =
+    uploadedData?.data?.slice(0, 5) || [];
+
+  const selectedFields = selected.filter(
+    (x: string) => x !== "All"
+  );
+
+  return (
+    <div className="fixed inset-0 z-[999] flex items-center justify-center p-6">
+
+      {/* BACKDROP */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-md"
+        onClick={onClose}
+      />
+
+      {/* MODAL */}
+      <div
+        className="
+          relative
+          w-full
+          max-w-6xl
+          bg-[var(--card)]
+          border border-[var(--border)]
+          rounded-[32px]
+          shadow-2xl
+          overflow-hidden
+        "
+      >
+
+        {/* HEADER */}
+        <div className="px-8 py-6 border-b border-[var(--border)]">
+
+          <div className="flex items-center justify-between">
+
+            <div>
+              <h2 className="text-2xl font-bold text-[var(--foreground)]">
+                Verify Matching Configuration
+              </h2>
+
+              <p className="text-sm text-[var(--foreground)]/60 mt-1">
+                Review selected fields before starting blockchain verification
+              </p>
+            </div>
+
+            <div
+              className="
+                w-14 h-14
+                rounded-2xl
+                bg-blue-100
+                dark:bg-blue-900/30
+                flex items-center justify-center
+                text-blue-600
+                text-2xl
+                font-bold
+              "
+            >
+              ✓
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* BODY */}
+        <div className="p-8">
+
+          {/* SELECTED FIELDS */}
+          <div className="mb-8">
+
+            <h3 className="font-semibold text-lg text-[var(--foreground)] mb-4">
+              Selected Matching Fields
+            </h3>
+
+            <div className="flex flex-wrap gap-3">
+
+              {selectedFields.map((item: string) => (
+
+                <div
+                  key={item}
+                  className="
+                    px-4 py-2
+                    rounded-full
+                    bg-blue-50
+                    dark:bg-blue-900/20
+                    border border-blue-200
+                    dark:border-blue-800
+                    text-blue-700
+                    dark:text-blue-300
+                    text-sm
+                    font-medium
+                  "
+                >
+                  {item}
+                </div>
+
+              ))}
+
+            </div>
+
+          </div>
+
+          {/* STATS */}
+          <div className="grid grid-cols-3 gap-4 mb-8">
+
+            <div
+              className="
+                rounded-2xl
+                border border-[var(--border)]
+                bg-[var(--background)]
+                p-5
+              "
+            >
+              <p className="text-xs text-gray-500">
+                Selected Fields
+              </p>
+
+              <h3 className="text-3xl font-bold mt-2 text-[var(--foreground)]">
+                {selectedFields.length}
+              </h3>
+            </div>
+
+            <div
+              className="
+                rounded-2xl
+                border border-[var(--border)]
+                bg-[var(--background)]
+                p-5
+              "
+            >
+              <p className="text-xs text-gray-500">
+                Preview Records
+              </p>
+
+              <h3 className="text-3xl font-bold mt-2 text-[var(--foreground)]">
+                {previewRows.length}
+              </h3>
+            </div>
+
+            <div
+              className="
+                rounded-2xl
+                border border-[var(--border)]
+                bg-[var(--background)]
+                p-5
+              "
+            >
+              <p className="text-xs text-gray-500">
+                Total Records
+              </p>
+
+              <h3 className="text-3xl font-bold mt-2 text-[var(--foreground)]">
+                {uploadedData?.data?.length || 0}
+              </h3>
+            </div>
+
+          </div>
+
+          {/* TABLE */}
+          <div
+            className="
+              border border-[var(--border)]
+              rounded-2xl
+              overflow-hidden
+              bg-[var(--background)]
+            "
+          >
+
+            <div className="px-5 py-4 border-b border-[var(--border)]">
+              <h3 className="font-semibold text-[var(--foreground)]">
+                Data Preview
+              </h3>
+            </div>
+
+            <div className="overflow-auto max-h-[420px]">
+
+              <table className="w-full">
+
+                <thead className="bg-slate-50 dark:bg-slate-800">
+
+                  <tr>
+
+                    {selectedFields.map(
+                      (field: string) => (
+
+                        <th
+                          key={field}
+                          className="
+                            px-4 py-4
+                            text-left
+                            text-xs
+                            uppercase
+                            tracking-wider
+                            font-semibold
+                            whitespace-nowrap
+                          "
+                        >
+                          {field}
+                        </th>
+
+                      )
+                    )}
+
+                  </tr>
+
+                </thead>
+
+                <tbody>
+
+                  {previewRows.map(
+                    (
+                      row: any,
+                      index: number
+                    ) => (
+
+                      <tr
+                        key={index}
+                        className="hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                      >
+
+                        {selectedFields.map(
+                          (field: string) => (
+
+                            <td
+                              key={field}
+                              className="
+                                px-4 py-3
+                                border-b
+                                border-[var(--border)]
+                                text-sm
+                                whitespace-nowrap
+                              "
+                            >
+                              {String(
+                                row[field] ?? "-"
+                              )}
+                            </td>
+
+                          )
+                        )}
+
+                      </tr>
+
+                    )
+                  )}
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* FOOTER */}
+        <div
+          className="
+            flex
+            items-center
+            justify-between
+            border-t
+            border-[var(--border)]
+            px-8
+            py-5
+          "
+        >
+
+          <div className="text-sm text-[var(--foreground)]/60">
+            Please verify the selected columns before continuing with blockchain matching.
+          </div>
+
+          <div className="flex gap-3">
+
+            <button
+              onClick={onClose}
+              className="
+                px-6 py-3
+                rounded-xl
+                border border-[var(--border)]
+                bg-[var(--card)]
+                hover:bg-slate-50
+                dark:hover:bg-slate-800
+                transition-all
+                font-medium
+              "
+            >
+              Edit Selection
+            </button>
+
+            <button
+              onClick={onConfirm}
+              className="
+                px-6 py-3
+                rounded-xl
+                bg-blue-600
+                hover:bg-blue-700
+                text-white
+                font-medium
+                shadow-lg
+                transition-all
+              "
+            >
+              Confirm & Continue →
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
   );
 }

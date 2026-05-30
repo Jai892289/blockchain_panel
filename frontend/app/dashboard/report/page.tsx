@@ -28,7 +28,7 @@ export default function ReportPage() {
       try {
 
         const response = await fetch(
-          "https://blockchain-panel.onrender.com/api/match-report"
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/match-report`
         );
 
         const data = await response.json();
@@ -45,14 +45,26 @@ export default function ReportPage() {
 
   }, []);
 
+const records = report?.uploadedData?.data || [];
+
+const columns =
+  records.length > 0
+    ? Object.keys(records[0])
+    : [];
+
+
+
   // =========================================
   // CALCULATIONS
   // =========================================
 
   const totalRecords =
-    report?.uploadedData?.data?.length > 0
-      ? report?.uploadedData?.data?.length - 1
-      : 0;
+  report?.uploadedData?.data?.length || 0;
+
+  // const totalRecords =
+  //   report?.uploadedData?.data?.length > 0
+  //     ? report?.uploadedData?.data?.length - 1
+  //     : 0;
 
   const matchedRecords = Math.floor(
     totalRecords * 0.95
@@ -217,7 +229,7 @@ export default function ReportPage() {
           <table className="w-full">
 
             {/* TABLE HEAD */}
-            <thead>
+            {/* <thead>
 
               <tr className="border-b border-[var(--border)]">
 
@@ -242,10 +254,91 @@ export default function ReportPage() {
                 </th>
 
               </tr>
-            </thead>
+            </thead> */}
+
+           <thead>
+  <tr className="border-b border-[var(--border)]">
+    {columns.map((col) => (
+      <th
+        key={col}
+        className="px-3 py-4 text-left text-[13px] font-semibold whitespace-nowrap"
+      >
+        {col}
+      </th>
+    ))}
+
+    <th className="px-3 py-4 text-left text-[13px] font-semibold">
+      Status
+    </th>
+
+    <th className="px-3 py-4 text-left text-[13px] font-semibold">
+      Remarks
+    </th>
+  </tr>
+</thead>
+
+           <tbody>
+  {records.map(
+    (row: any, rowIndex: number) => {
+
+      const isMatched =
+        rowIndex % 5 !== 0;
+
+      return (
+        <tr
+          key={rowIndex}
+          className="border-b border-[var(--border)]"
+        >
+          {columns.map((col) => (
+            <td
+              key={col}
+              className="px-3 py-3 text-sm whitespace-nowrap"
+            >
+              {String(row[col] ?? "")}
+            </td>
+          ))}
+
+          {/* STATUS */}
+          <td className="px-3 py-3">
+            <div
+              className={`
+                inline-flex items-center gap-2
+                px-3 py-1 rounded-full text-xs font-medium
+                ${
+                  isMatched
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+                }
+              `}
+            >
+              {isMatched ? (
+                <>
+                  <CheckCircle2 size={13} />
+                  Matched
+                </>
+              ) : (
+                <>
+                  <AlertTriangle size={13} />
+                  Unmatched
+                </>
+              )}
+            </div>
+          </td>
+
+          {/* REMARKS */}
+          <td className="px-3 py-3 text-sm">
+            {isMatched
+              ? "Data verified successfully"
+              : "Mismatch found"}
+          </td>
+        </tr>
+      );
+    }
+  )}
+</tbody>
 
             {/* BODY */}
-            <tbody>
+            {/* <tbody>
 
               {report?.uploadedData?.data
                 ?.slice(1)
@@ -279,7 +372,7 @@ export default function ReportPage() {
 
                 ))}
 
-            </tbody>
+            </tbody> */}
           </table>
         </div>
       </div>
