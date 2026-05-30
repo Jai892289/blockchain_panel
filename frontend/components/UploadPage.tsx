@@ -385,12 +385,14 @@ function PreviewModal({
         className="
           relative
           w-full
-          max-w-7xl
+          max-w-5xl
+          h-[600px]
+          overflow-scroll
           bg-[var(--card)]
           border border-[var(--border)]
           rounded-[32px]
           shadow-2xl
-          overflow-hidden
+
         "
       >
 
@@ -432,9 +434,9 @@ function PreviewModal({
         <div className="p-8">
 
           {/* STATS */}
-          <div className="grid grid-cols-3 gap-5 mb-8">
+<div className="grid grid-cols-3 gap-3 mb-6">
 
-            <div className="rounded-2xl border border-[var(--border)] p-5 bg-[var(--background)]">
+            <div className="rounded-2xl border border-[var(--border)] p-4 bg-[var(--background)]">
 
               <p className="text-xs text-[var(--foreground)]/60">
                 Total Records
@@ -525,8 +527,13 @@ function PreviewModal({
 
             </div>
 
-            <div className="overflow-auto max-h-[500px]">
-
+<div
+  className="
+    overflow-auto
+    h-[350px]
+    max-w-full 
+  "
+>
               <table className="w-full">
 
                 <thead className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-10">
@@ -560,7 +567,7 @@ function PreviewModal({
                 <tbody>
 
                   {data
-                    .slice(0, 10)
+                    
                     .map((row, index) => (
 
                       <tr
@@ -630,6 +637,7 @@ function PreviewModal({
                 dark:hover:bg-slate-800
                 transition-all
                 font-medium
+                cursor-pointer
               "
             >
               Upload Different File
@@ -646,6 +654,8 @@ function PreviewModal({
                 font-medium
                 shadow-lg
                 transition-all
+                                cursor-pointer
+
               "
             >
               Confirm & Continue →

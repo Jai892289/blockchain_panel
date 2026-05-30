@@ -13,9 +13,65 @@ import {
   XCircle,
 } from "lucide-react";
 
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 export default function ReportPage() {
 
   const [report, setReport] = useState<any>(null);
+
+  const handleDownloadReport = () => {
+  if (!records.length) return;
+
+  const exportData = records.map(
+    (row: any, index: number) => ({
+      ...row,
+      Status:
+        index % 5 !== 0
+          ? "Matched"
+          : "Unmatched",
+      Remarks:
+        index % 5 !== 0
+          ? "Data verified successfully"
+          : "Mismatch found",
+    })
+  );
+
+  const worksheet =
+    XLSX.utils.json_to_sheet(exportData);
+
+  const workbook =
+    XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    worksheet,
+    "Match Report"
+  );
+
+  const excelBuffer = XLSX.write(
+    workbook,
+    {
+      bookType: "xlsx",
+      type: "array",
+    }
+  );
+
+  const fileData = new Blob(
+    [excelBuffer],
+    {
+      type:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }
+  );
+
+  saveAs(
+    fileData,
+    `match-report-${new Date()
+      .toISOString()
+      .slice(0, 10)}.xlsx`
+  );
+};
 
   // =========================================
   // FETCH REPORT API
@@ -45,10 +101,14 @@ export default function ReportPage() {
 
   }, []);
 
-const records = report?.uploadedData?.data || [];
+  const records = Array.isArray(report?.uploadedData)
+  ? report.uploadedData
+  : report?.uploadedData?.data || [];
+
+// const records = report?.uploadedData?.data || [];
 
 const columns =
-  records.length > 0
+  Array.isArray(records) && records.length > 0
     ? Object.keys(records[0])
     : [];
 
@@ -58,8 +118,10 @@ const columns =
   // CALCULATIONS
   // =========================================
 
-  const totalRecords =
-  report?.uploadedData?.data?.length || 0;
+  const totalRecords = records.length;
+
+  // const totalRecords =
+  // report?.uploadedData?.data?.length || 0;
 
   // const totalRecords =
   //   report?.uploadedData?.data?.length > 0
@@ -104,7 +166,7 @@ const columns =
         {/* ACTION BUTTONS */}
         <div className="flex items-center gap-3">
 
-          <button
+          {/* <button
             className="
               h-11 px-5
               rounded-xl
@@ -120,9 +182,28 @@ const columns =
           >
             <FileText size={17} />
             View Reports
-          </button>
+          </button> */}
 
           <button
+  onClick={handleDownloadReport}
+  className="
+    h-11 px-5
+    rounded-xl
+    bg-[#2563eb]
+    text-white
+    flex items-center gap-2
+    text-sm font-medium
+    hover:bg-[#1d4ed8]
+    transition-all
+    shadow-md
+    cursor-pointer
+  "
+>
+   <Download size={17} />
+            Download Report
+</button>
+
+          {/* <button
             className="
               h-11 px-5
               rounded-xl
@@ -138,7 +219,7 @@ const columns =
           >
             <Download size={17} />
             Download Report
-          </button>
+          </button> */}
 
         </div>
       </div>

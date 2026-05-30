@@ -35,7 +35,7 @@ export default function MatchDataFlow() {
   const [format, setFormat] = useState("CSV");
   const [options, setOptions] = useState<string[]>([]);
   const [showPreview, setShowPreview] =
-  useState(false);
+    useState(false);
 
   // =========================================
   // STEPS
@@ -76,24 +76,24 @@ export default function MatchDataFlow() {
   // =========================================
 
   useEffect(() => {
-  const stored = localStorage.getItem("uploadedData");
+    const stored = localStorage.getItem("uploadedData");
 
-  if (stored) {
-    const parsed = JSON.parse(stored);
+    if (stored) {
+      const parsed = JSON.parse(stored);
 
-    setUploadedData(parsed);
+      setUploadedData(parsed);
 
-    // Get column names dynamically
-    const firstRow = parsed?.data?.[0];
+      // Get column names dynamically
+      const firstRow = parsed?.data?.[0];
 
-    if (firstRow) {
-      setOptions([
-        "All",
-        ...Object.keys(firstRow),
-      ]);
+      if (firstRow) {
+        setOptions([
+          "All",
+          ...Object.keys(firstRow),
+        ]);
+      }
     }
-  }
-}, []);
+  }, []);
 
   // useEffect(() => {
 
@@ -158,6 +158,21 @@ export default function MatchDataFlow() {
   // FINAL SUBMIT
   // =========================================
 
+  const selectedColumns = selected.filter(
+  (field) => field !== "All"
+);
+
+const filteredData =
+  uploadedData?.data?.map((row: any) => {
+    const filteredRow: any = {};
+
+    selectedColumns.forEach((field) => {
+      filteredRow[field] = row[field];
+    });
+
+    return filteredRow;
+  });
+
   const handleStartMatching = async () => {
 
     try {
@@ -165,12 +180,20 @@ export default function MatchDataFlow() {
       setLoading(true);
 
       const payload = {
-        uploadedData,
-        selectedFields: selected,
-        format,
-        fromDate,
-        toDate,
-      };
+  uploadedData: filteredData,
+  selectedFields: selectedColumns,
+  format,
+  fromDate,
+  toDate,
+};
+
+      // const payload = {
+      //   uploadedData,
+      //   selectedFields: selected,
+      //   format,
+      //   fromDate,
+      //   toDate,
+      // };
 
       console.log(payload);
 
@@ -289,26 +312,24 @@ export default function MatchDataFlow() {
 
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
-                      ${
-                        isCompleted
+                      ${isCompleted
                           ? "bg-green-500 text-white"
                           : isActive
-                          ? "bg-blue-600 text-white"
-                          : "bg-[var(--border)] text-gray-500"
-                      }`}
+                            ? "bg-blue-600 text-white"
+                            : "bg-[var(--border)] text-gray-500"
+                        }`}
                     >
                       {isCompleted ? "✔" : stepNumber}
                     </div>
 
                     <span
                       className={`text-xs mt-2
-                      ${
-                        isCompleted
+                      ${isCompleted
                           ? "text-green-600"
                           : isActive
-                          ? "text-blue-600"
-                          : "text-gray-400"
-                      }`}
+                            ? "text-blue-600"
+                            : "text-gray-400"
+                        }`}
                     >
                       {label}
                     </span>
@@ -318,11 +339,10 @@ export default function MatchDataFlow() {
                   {index !== steps.length - 1 && (
 
                     <div
-                      className={`w-12 h-[2px] mx-3 ${
-                        step > stepNumber
+                      className={`w-12 h-[2px] mx-3 ${step > stepNumber
                           ? "bg-green-500"
                           : "bg-[var(--border)]"
-                      }`}
+                        }`}
                     />
 
                   )}
@@ -355,8 +375,8 @@ export default function MatchDataFlow() {
 
                   <span className="text-gray-400 text-sm">
                     {selected.length === 0
-  ? "-Please Select-"
-  : selected.join(", ")}
+                      ? "-Please Select-"
+                      : selected.join(", ")}
 
                     {/* {selected.length === 0
                       ? "-Please Select-"
@@ -533,17 +553,17 @@ export default function MatchDataFlow() {
                 } else {
 
                   if (step === 1) {
-  if (selected.length === 0) {
-    alert(
-      "Please select at least one field"
-    );
-    return;
-  }
+                    if (selected.length === 0) {
+                      alert(
+                        "Please select at least one field"
+                      );
+                      return;
+                    }
 
-  setShowPreview(true);
-} else {
-  setStep((s) => s + 1);
-}
+                    setShowPreview(true);
+                  } else {
+                    setStep((s) => s + 1);
+                  }
 
                   // setStep((s) => s + 1);
                 }
@@ -556,20 +576,20 @@ export default function MatchDataFlow() {
           </div>
         </div>
       </div>
-{showPreview && (
-  <PreviewModal
-    selected={selected}
-    uploadedData={uploadedData}
-    onClose={() =>
-      setShowPreview(false)
-    }
-    onConfirm={() => {
-      setShowPreview(false);
-      setStep(2);
-    }}
-  />
-)}
-      
+      {showPreview && (
+        <PreviewModal
+          selected={selected}
+          uploadedData={uploadedData}
+          onClose={() =>
+            setShowPreview(false)
+          }
+          onConfirm={() => {
+            setShowPreview(false);
+            setStep(2);
+          }}
+        />
+      )}
+
 
     </div>
   );
@@ -582,7 +602,7 @@ function PreviewModal({
   onConfirm,
 }: any) {
   const previewRows =
-    uploadedData?.data?.slice(0, 5) || [];
+    uploadedData?.data || [];
 
   const selectedFields = selected.filter(
     (x: string) => x !== "All"
@@ -607,7 +627,8 @@ function PreviewModal({
           border border-[var(--border)]
           rounded-[32px]
           shadow-2xl
-          overflow-hidden
+          overflow-scroll
+          h-[600px]
         "
       >
 
@@ -751,7 +772,7 @@ function PreviewModal({
 
             <div className="px-5 py-4 border-b border-[var(--border)]">
               <h3 className="font-semibold text-[var(--foreground)]">
-                Data Preview
+                Data Preview 
               </h3>
             </div>
 
@@ -867,6 +888,7 @@ function PreviewModal({
                 dark:hover:bg-slate-800
                 transition-all
                 font-medium
+                cursor-pointer
               "
             >
               Edit Selection
@@ -883,6 +905,8 @@ function PreviewModal({
                 font-medium
                 shadow-lg
                 transition-all
+                                cursor-pointer
+
               "
             >
               Confirm & Continue →
