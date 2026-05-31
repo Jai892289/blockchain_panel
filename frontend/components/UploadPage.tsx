@@ -92,12 +92,21 @@ const [previewData, setPreviewData] = useState<any[]>([]);
         }
       );
 
-      const data = await response.json();
+      await response.json();
 
-      localStorage.setItem(
-        "uploadedData",
-        JSON.stringify(data)
-      );
+
+localStorage.setItem(
+  "uploadedData",
+  JSON.stringify({
+    success: true,
+    data: previewData,
+  })
+);
+
+      // localStorage.setItem(
+      //   "uploadedData",
+      //   JSON.stringify(data)
+      // );
 
       setStatus("done");
 
@@ -119,7 +128,7 @@ const [previewData, setPreviewData] = useState<any[]>([]);
         </h3>
 
         <p className="text-[15px] text-[var(--foreground)]/60 mt-2">
-          Supported formats: XLS, CSV, SQL - Maximum file size: 50MB
+          Supported formats: XLSX, CSV - Maximum file size: 50MB
         </p>
 
         {/* ================= UPLOAD AREA ================= */}
@@ -235,7 +244,7 @@ const [previewData, setPreviewData] = useState<any[]>([]);
 
           {/* BOTTOM TEXT */}
           <p className="text-xs text-[#8ba0c7] mt-5">
-            Supported formats: XLS, XLSX, CSV
+            Supported formats: XLSX, CSV
           </p>
         </div>
       </div>

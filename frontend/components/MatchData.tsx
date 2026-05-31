@@ -68,7 +68,6 @@ export default function MatchDataFlow() {
   const formats = [
     { label: "Excel (.xls, .xlsx)", value: "Excel" },
     { label: "CSV (.csv)", value: "CSV" },
-    { label: "SQL Database (.sql)", value: "SQL" },
   ];
 
   // =========================================
@@ -76,24 +75,69 @@ export default function MatchDataFlow() {
   // =========================================
 
   useEffect(() => {
-    const stored = localStorage.getItem("uploadedData");
+  const stored = localStorage.getItem("uploadedData");
 
-    if (stored) {
-      const parsed = JSON.parse(stored);
+  if (stored) {
+    const parsed = JSON.parse(stored);
 
-      setUploadedData(parsed);
+    setUploadedData(parsed);
 
-      // Get column names dynamically
-      const firstRow = parsed?.data?.[0];
+    const rows = parsed?.data || [];
 
-      if (firstRow) {
-        setOptions([
-          "All",
-          ...Object.keys(firstRow),
-        ]);
-      }
-    }
-  }, []);
+    const firstRow = Array.isArray(rows)
+      ? rows[0]
+      : null;
+
+      setOptions(["All"]);
+
+    // if (firstRow && typeof firstRow === "object") {
+    //   setOptions([
+    //     "All",
+    //     ...Object.keys(firstRow),
+    //   ]);
+    // }
+
+    console.log("UPLOADED DATA", parsed);
+    console.log("FIRST ROW", firstRow);
+  }
+}, []);
+
+//   useEffect(() => {
+//     const stored = 
+//     localStorage.getItem("uploadedData");
+
+//     if (stored) {
+//       const parsed = JSON.parse(stored);
+
+//       setUploadedData(parsed);
+
+//       // Get column names dynamically
+//       // const firstRow = parsed?.data?.[0];
+
+//       const rows = parsed?.data || parsed;
+
+// const firstRow = Array.isArray(rows)
+//   ? rows[0]
+//   : null;
+
+// if (firstRow && typeof firstRow === "object") {
+//   setOptions([
+//     "All",
+//     ...Object.keys(firstRow),
+//   ]);
+// }
+
+//       console.log("UPLOADED DATA", parsed);
+// console.log("FIRST ROW", parsed?.data?.[0]);
+
+//       // if (firstRow) {
+//       //   setOptions([
+//       //     "All",
+//       //     ...Object.keys(firstRow),
+//       //   ]);
+//       // }
+//     }
+//   }, []);
 
   // useEffect(() => {
 
@@ -139,28 +183,52 @@ export default function MatchDataFlow() {
   // =========================================
 
   const handleSelect = (value: string) => {
-
-    if (value === "All") {
-
-      setSelected(selected.includes("All") ? [] : options);
-
-      return;
-    }
-
-    setSelected((prev) =>
-      prev.includes(value)
-        ? prev.filter((v) => v !== value)
-        : [...prev.filter((v) => v !== "All"), value]
+  if (value === "All") {
+    setSelected(
+      selected.includes("All")
+        ? []
+        : ["All"]
     );
-  };
+  }
+};
+
+  // const handleSelect = (value: string) => {
+
+  //   if (value === "All") {
+
+  //     setSelected(selected.includes("All") ? [] : options);
+
+  //     return;
+  //   }
+
+  //   setSelected((prev) =>
+  //     prev.includes(value)
+  //       ? prev.filter((v) => v !== value)
+  //       : [...prev.filter((v) => v !== "All"), value]
+  //   );
+  // };
 
   // =========================================
   // FINAL SUBMIT
   // =========================================
 
-  const selectedColumns = selected.filter(
-  (field) => field !== "All"
-);
+//   const selectedColumns = selected.filter(
+//   (field) => field !== "All"
+// );
+
+const rows =
+  uploadedData?.data || uploadedData || [];
+
+const selectedColumns =
+  selected.includes("All")
+    ? Object.keys(rows[0] || {})
+    : selected;
+
+// const selectedColumns =
+//   selected.includes("All")
+//     ? Object.keys(uploadedData?.data?.[0] || {})
+//     : selected;
+
 
 const filteredData =
   uploadedData?.data?.map((row: any) => {
@@ -273,6 +341,8 @@ const filteredData =
     );
   }
 
+  
+
   return (
 
     <div className="w-full h-full flex flex-col p-4 bg-[var(--background)]">
@@ -374,9 +444,14 @@ const filteredData =
                 >
 
                   <span className="text-gray-400 text-sm">
-                    {selected.length === 0
+                    <span className="text-gray-400 text-sm">
+  {selected.length === 0
+    ? "-Please Select-"
+    : "All"}
+</span>
+                    {/* {selected.length === 0
                       ? "-Please Select-"
-                      : selected.join(", ")}
+                      : selected.join(", ")} */}
 
                     {/* {selected.length === 0
                       ? "-Please Select-"
@@ -468,7 +543,7 @@ const filteredData =
                   </div>
                 )}
               </div>
-
+{/* 
               <input
                 type="date"
                 value={fromDate}
@@ -481,7 +556,7 @@ const filteredData =
                 value={toDate}
                 onChange={(e) => setToDate(e.target.value)}
                 className="w-full border border-[var(--border)] rounded-lg px-4 py-3 bg-[var(--card)]"
-              />
+              /> */}
 
             </div>
           )}
@@ -508,13 +583,13 @@ const filteredData =
                     <strong>Format:</strong> {format}
                   </p>
 
-                  <p>
+                  {/* <p>
                     <strong>From Date:</strong> {fromDate}
                   </p>
 
                   <p>
                     <strong>To Date:</strong> {toDate}
-                  </p>
+                  </p> */}
 
                   <p>
                     <strong>Uploaded Records:</strong>{" "}
@@ -534,14 +609,26 @@ const filteredData =
 
           {/* BUTTONS */}
           <div className="flex justify-center gap-4 mt-6">
-
             <button
+  onClick={() => {
+    if (step === 1) {
+      router.back(); // go to previous page
+    } else {
+      setStep((s) => s - 1);
+    }
+  }}
+  className="w-62 py-3 border border-blue-500 text-blue-500 rounded-lg cursor-pointer"
+>
+  ← Back
+</button>
+
+            {/* <button
               disabled={step === 1}
               onClick={() => setStep((s) => s - 1)}
               className="w-62 py-3 border border-blue-500 text-blue-500 rounded-lg cursor-pointer"
             >
-              ← Back
-            </button>
+              ← Back 
+            </button> */}
 
             <button
               onClick={() => {
@@ -604,9 +691,16 @@ function PreviewModal({
   const previewRows =
     uploadedData?.data || [];
 
-  const selectedFields = selected.filter(
-    (x: string) => x !== "All"
-  );
+    const selectedFields =
+  selected.includes("All")
+    ? Object.keys(
+        uploadedData?.data?.[0] || {}
+      )
+    : selected;
+
+  // const selectedFields = selected.filter(
+  //   (x: string) => x !== "All"
+  // );
 
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center p-6">
@@ -876,7 +970,7 @@ function PreviewModal({
           </div>
 
           <div className="flex gap-3">
-
+{/* 
             <button
               onClick={onClose}
               className="
@@ -892,7 +986,7 @@ function PreviewModal({
               "
             >
               Edit Selection
-            </button>
+            </button> */}
 
             <button
               onClick={onConfirm}
