@@ -20,25 +20,37 @@ export default function ReportPage() {
 
   const [report, setReport] = useState<any>(null);
 
-  const handleDownloadReport = () => {
+const handleDownloadReport = () => {
+
   if (!records.length) return;
 
   const exportData = records.map(
-    (row: any, index: number) => ({
-      ...row,
+    (row: any) => ({
+
+      ...row.data,
+
       Status:
-        index % 5 !== 0
+        row.status === "matched"
           ? "Matched"
           : "Unmatched",
+
+      Transaction_ID:
+        row.txnId,
+
+      Hash:
+        row.hash,
+
       Remarks:
-        index % 5 !== 0
+        row.status === "matched"
           ? "Data verified successfully"
           : "Mismatch found",
     })
   );
 
   const worksheet =
-    XLSX.utils.json_to_sheet(exportData);
+    XLSX.utils.json_to_sheet(
+      exportData
+    );
 
   const workbook =
     XLSX.utils.book_new();
@@ -49,13 +61,11 @@ export default function ReportPage() {
     "Match Report"
   );
 
-  const excelBuffer = XLSX.write(
-    workbook,
-    {
+  const excelBuffer =
+    XLSX.write(workbook, {
       bookType: "xlsx",
       type: "array",
-    }
-  );
+    });
 
   const fileData = new Blob(
     [excelBuffer],
@@ -77,40 +87,46 @@ export default function ReportPage() {
   // FETCH REPORT API
   // =========================================
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    const fetchReport = async () => {
+  //   const fetchReport = async () => {
 
-      try {
+  //     try {
 
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/match-report`
-        );
+  //       const response = await fetch(
+  //         `${process.env.NEXT_PUBLIC_API_BASE_URL}/match-report`
+  //       );
 
-        const data = await response.json();
+  //       const data = await response.json();
 
-        setReport(data.data);
+  //       setReport(data.data);
 
-      } catch (error) {
+  //     } catch (error) {
 
-        console.log(error);
-      }
-    };
+  //       console.log(error);
+  //     }
+  //   };
 
-    fetchReport();
+  //   fetchReport();
 
-  }, []);
+  // }, []);
 
-  const records = Array.isArray(report?.uploadedData)
-  ? report.uploadedData
-  : report?.uploadedData?.data || [];
-
-// const records = report?.uploadedData?.data || [];
+  const records =
+  report?.verificationRecords || [];
 
 const columns =
-  Array.isArray(records) && records.length > 0
-    ? Object.keys(records[0])
-    : [];
+  report?.columns || [];
+
+//   const records = Array.isArray(report?.uploadedData)
+//   ? report.uploadedData
+//   : report?.uploadedData?.data || [];
+
+// // const records = report?.uploadedData?.data || [];
+
+// const columns =
+//   Array.isArray(records) && records.length > 0
+//     ? Object.keys(records[0])
+//     : [];
 
 
 
@@ -118,7 +134,7 @@ const columns =
   // CALCULATIONS
   // =========================================
 
-  const totalRecords = records.length;
+  // const totalRecords = records.length;
 
   // const totalRecords =
   // report?.uploadedData?.data?.length || 0;
@@ -128,20 +144,103 @@ const columns =
   //     ? report?.uploadedData?.data?.length - 1
   //     : 0;
 
-  const matchedRecords = Math.floor(
-    totalRecords * 0.95
-  );
+  const totalRecords =
+  report?.totalRecords || 0;
 
-  const mismatchedRecords =
-    totalRecords - matchedRecords;
+const matchedRecords =
+  report?.matchedRecords || 0;
 
-  const accuracyRate =
-    totalRecords > 0
-      ? (
-          (matchedRecords / totalRecords) *
-          100
-        ).toFixed(1)
-      : 0;
+const mismatchedRecords =
+  report?.unmatchedRecords || 0;
+
+const accuracyRate =
+  report?.matchPercentage || 0;
+
+
+
+  // const matchedRecords = Math.floor(
+  //   totalRecords * 0.95
+  // );
+
+  // const mismatchedRecords =
+  //   totalRecords - matchedRecords;
+
+  // const accuracyRate =
+  //   totalRecords > 0
+  //     ? (
+  //         (matchedRecords / totalRecords) *
+  //         100
+  //       ).toFixed(1)
+  //     : 0;
+
+useEffect(() => {
+
+  const stored =
+    sessionStorage.getItem(
+      "matchReport"
+    );
+
+  if (stored) {
+
+    setReport(
+      JSON.parse(stored)
+    );
+
+  }
+
+}, []);
+
+useEffect(() => {
+
+  const stored =
+    sessionStorage.getItem(
+      "matchReport"
+    );
+
+  if (stored) {
+
+    setReport(
+      JSON.parse(stored)
+    );
+
+    // Remove immediately
+    sessionStorage.removeItem(
+      "matchReport"
+    );
+  }
+
+}, []);
+
+//   if (!report) {
+//   return (
+//     <div className="w-full p-10">
+
+//       <div
+//         className="
+//           bg-white
+//           rounded-3xl
+//           border
+//           border-[var(--border)]
+//           py-24
+//           text-center
+//         "
+//       >
+//         <h2 className="text-2xl font-bold mb-2">
+//           No Matching Results
+//         </h2>
+
+//         <p className="text-gray-500">
+//           Create a blockchain record or start matching to generate a report.
+//         </p>
+
+//       </div>
+
+//     </div>
+//   );
+// }
+
+
+
 
   return (
 
@@ -154,7 +253,7 @@ const columns =
         <div>
 
           <h1 className="text-[26px]  font-bold text-[var(--foreground)] leading-none">
-            Match Results
+            Matching Results 
           </h1>
 
           <p className="text-[14px] text-[var(--foreground)]/60 mt-2">
@@ -304,163 +403,135 @@ const columns =
 
         </div>
 
-        {/* TABLE */}
-        <div className="overflow-x-auto">
+  <div className="overflow-x-auto rounded-2xl border border-[var(--border)]">
 
-          <table className="w-full">
+ {/* TABLE */}
+<div className="overflow-x-auto">
 
-            {/* TABLE HEAD */}
-            {/* <thead>
+  <table className="w-full min-w-[1200px]">
 
-              <tr className="border-b border-[var(--border)]">
+    {/* HEADER */}
+    <thead>
 
-                <th className="text-left py-4 px-3 text-[13px] font-semibold text-[var(--foreground)]">
-                  Record ID
-                </th>
+      <tr className="border-b border-[var(--border)]">
 
-                <th className="text-left py-4 px-3 text-[13px] font-semibold text-[var(--foreground)]">
-                  Record Type
-                </th>
-
-                <th className="text-left py-4 px-3 text-[13px] font-semibold text-[var(--foreground)]">
-                  Status
-                </th>
-
-                <th className="text-left py-4 px-3 text-[13px] font-semibold text-[var(--foreground)]">
-                  Remarks
-                </th>
-
-                <th className="text-left py-4 px-3 text-[13px] font-semibold text-[var(--foreground)]">
-                  Timestamp
-                </th>
-
-              </tr>
-            </thead> */}
-
-           <thead>
-  <tr className="border-b border-[var(--border)]">
-    {columns.map((col) => (
-      <th
-        key={col}
-        className="px-3 py-4 text-left text-[13px] font-semibold whitespace-nowrap"
-      >
-        {col}
-      </th>
-    ))}
-
-    <th className="px-3 py-4 text-left text-[13px] font-semibold">
-      Status
-    </th>
-
-    <th className="px-3 py-4 text-left text-[13px] font-semibold">
-      Remarks
-    </th>
-  </tr>
-</thead>
-
-           <tbody>
-  {records.map(
-    (row: any, rowIndex: number) => {
-
-      const isMatched =
-        rowIndex % 5 !== 0;
-
-      return (
-        <tr
-          key={rowIndex}
-          className="border-b border-[var(--border)]"
+        <th
+          className="
+            px-4 py-4
+            text-left
+            text-sm
+            font-semibold
+            whitespace-nowrap
+          "
         >
-          {columns.map((col) => (
-            <td
-              key={col}
-              className="px-3 py-3 text-sm whitespace-nowrap"
-            >
-              {String(row[col] ?? "")}
-            </td>
-          ))}
+          TXN
+        </th>
 
-          {/* STATUS */}
-          <td className="px-3 py-3">
-            <div
-              className={`
-                inline-flex items-center gap-2
-                px-3 py-1 rounded-full text-xs font-medium
-                ${
-                  isMatched
-                    ? "bg-green-100 text-green-700"
-                    : "bg-red-100 text-red-700"
-                }
-              `}
-            >
-              {isMatched ? (
-                <>
-                  <CheckCircle2 size={13} />
-                  Matched
-                </>
-              ) : (
-                <>
-                  <AlertTriangle size={13} />
-                  Unmatched
-                </>
-              )}
-            </div>
+        <th
+          className="
+            px-4 py-4
+            text-left
+            text-sm
+            font-semibold
+            whitespace-nowrap
+          "
+        >
+          Timestamp
+        </th>
+
+        <th
+          className="
+            px-4 py-4
+            text-left
+            text-sm
+            font-semibold
+          "
+        >
+          Record
+        </th>
+
+      </tr>
+
+    </thead>
+
+
+<tbody>
+
+  {records.length === 0 ? (
+
+    <tr>
+
+      <td
+        colSpan={3}
+        className="
+          py-20
+          text-center
+          text-gray-500
+        "
+      >
+        No Matching Results
+      </td>
+
+    </tr>
+
+  ) : (
+
+    records.map(
+      (row: any, index: number) => (
+
+        <tr
+          key={index}
+          className="
+            border-b
+            border-[var(--border)]
+          "
+        >
+          <td className="px-4 py-4">
+            {row.txnId}
           </td>
 
-          {/* REMARKS */}
-          <td className="px-3 py-3 text-sm">
-            {isMatched
-              ? "Data verified successfully"
-              : "Mismatch found"}
+          <td className="px-4 py-4">
+            {report?.createdAt
+              ? new Date(
+                  report.createdAt
+                ).toISOString()
+              : "-"}
           </td>
+
+          <td className="px-4 py-4">
+
+            {JSON.stringify({
+              ...row.data,
+              Status:
+                row.status ===
+                "matched"
+                  ? "Matched"
+                  : "Unmatched",
+              import_hash:
+                row.hash,
+            })}
+
+          </td>
+
         </tr>
-      );
-    }
+
+      )
+    )
+
   )}
+
 </tbody>
 
-            {/* BODY */}
-            {/* <tbody>
+  </table>
 
-              {report?.uploadedData?.data
-                ?.slice(1)
-                ?.map((item: any, index: number) => (
+</div>
 
-                  <Row
-                    key={index}
-
-                    id={`REC${String(index + 1).padStart(3, "0")}`}
-
-                    type={
-                      item.__EMPTY_1 ||
-                      "Property Tax"
-                    }
-
-                    status={
-                      index % 5 === 0
-                        ? "mismatch"
-                        : "matched"
-                    }
-
-                    remark={
-                      index % 5 === 0
-                        ? "Amount discrepancy detected"
-                        : "Data verified successfully"
-                    }
-
-                    timestamp={report?.createdAt}
-
-                  />
-
-                ))}
-
-            </tbody> */}
-          </table>
-        </div>
+</div>
       </div>
 
       {/* ================================= BLOCKCHAIN DETAILS ================================= */}
 
-      <div
+      {/* <div
         className="
           rounded-[30px]
           border
@@ -473,15 +544,12 @@ const columns =
         "
       >
 
-        {/* TITLE */}
         <h2 className="text-[24px]  font-bold text-[#2563eb] mb-8">
           Blockchain Verification Details
         </h2>
 
-        {/* GRID */}
         <div className="grid grid-cols-2 gap-y-10 gap-x-16">
 
-          {/* BLOCK NUMBER */}
           <div>
 
             <p className="text-[14px] text-[var(--foreground)]/65 mb-1">
@@ -494,7 +562,6 @@ const columns =
 
           </div>
 
-          {/* HASH */}
           <div>
 
             <p className="text-[14px] text-[var(--foreground)]/65 mb-1">
@@ -508,7 +575,6 @@ const columns =
 
           </div>
 
-          {/* NETWORK */}
           <div>
 
             <p className="text-[14px] text-[var(--foreground)]/65 mb-1">
@@ -521,7 +587,6 @@ const columns =
 
           </div>
 
-          {/* DATE */}
           <div>
 
             <p className="text-[14px] text-[var(--foreground)]/65 mb-1">
@@ -537,7 +602,7 @@ const columns =
           </div>
 
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

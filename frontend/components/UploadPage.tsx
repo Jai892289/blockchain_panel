@@ -9,6 +9,9 @@ import {
 } from "lucide-react";
 import * as XLSX from "xlsx";
 
+import { toast } from "sonner";
+
+
 function ProcessingModal() {
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -37,42 +40,82 @@ function ProcessingModal() {
   );
 }
 
+
+
+
 export default function UploadPages() {
+
+  const [error, setError] = useState("");
+
+  const ALLOWED_EXTENSIONS = [".csv", ".xlsx"];
+
+  const handleFileSelect = async (selected: File) => {
+    const extension =
+      "." + selected.name.split(".").pop()?.toLowerCase();
+
+    if (!ALLOWED_EXTENSIONS.includes(extension)) {
+      toast.error("Only CSV and XLSX files are allowed");
+
+      // alert("Only CSV and XLSX files are allowed.");
+      return;
+    }
+
+    setFile(selected);
+    setStatus("uploaded");
+
+    try {
+      const buffer = await selected.arrayBuffer();
+
+      const workbook = XLSX.read(buffer, {
+        type: "array",
+      });
+
+      const sheet =
+        workbook.Sheets[workbook.SheetNames[0]];
+
+      const json = XLSX.utils.sheet_to_json(sheet);
+
+      setPreviewData(json);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
 
   const [status, setStatus] = useState<
     "idle" | "uploaded" | "processing" | "done"
   >("idle");
 
   const [showPreview, setShowPreview] = useState(false);
-const [previewData, setPreviewData] = useState<any[]>([]);
+  const [previewData, setPreviewData] = useState<any[]>([]);
 
   const [file, setFile] = useState<File | null>(null);
 
   const router = useRouter();
 
-  const handleFileSelect = async (selected: File) => {
-  setFile(selected);
-  setStatus("uploaded");
+  //   const handleFileSelect = async (selected: File) => {
+  //   setFile(selected);
+  //   setStatus("uploaded");
 
-  try {
-    const buffer = await selected.arrayBuffer();
+  //   try {
+  //     const buffer = await selected.arrayBuffer();
 
-    const workbook = XLSX.read(buffer, {
-      type: "array",
-    });
+  //     const workbook = XLSX.read(buffer, {
+  //       type: "array",
+  //     });
 
-    const sheet =
-      workbook.Sheets[
-        workbook.SheetNames[0]
-      ];
+  //     const sheet =
+  //       workbook.Sheets[
+  //         workbook.SheetNames[0]
+  //       ];
 
-    const json = XLSX.utils.sheet_to_json(sheet);
+  //     const json = XLSX.utils.sheet_to_json(sheet);
 
-    setPreviewData(json);
-  } catch (err) {
-    console.log(err);
-  }
-};
+  //     setPreviewData(json);
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
 
   const handleSubmit = async () => {
     if (!file) return;
@@ -95,13 +138,13 @@ const [previewData, setPreviewData] = useState<any[]>([]);
       await response.json();
 
 
-localStorage.setItem(
-  "uploadedData",
-  JSON.stringify({
-    success: true,
-    data: previewData,
-  })
-);
+      localStorage.setItem(
+        "uploadedData",
+        JSON.stringify({
+          success: true,
+          data: previewData,
+        })
+      );
 
       // localStorage.setItem(
       //   "uploadedData",
@@ -127,6 +170,12 @@ localStorage.setItem(
           File Upload
         </h3>
 
+        {error && (
+          <p className="text-red-500 text-sm mb-3">
+            {error}
+          </p>
+        )}
+
         <p className="text-[15px] text-[var(--foreground)]/60 mt-2">
           Supported formats: XLSX, CSV - Maximum file size: 50MB
         </p>
@@ -138,9 +187,12 @@ localStorage.setItem(
             e.preventDefault();
 
             const droppedFile = e.dataTransfer.files[0];
+            //             if (droppedFile) {
+            //   handleFileSelect(droppedFile);
+            // }
             if (droppedFile) {
-  handleFileSelect(droppedFile);
-}
+              handleFileSelect(droppedFile);
+            }
 
             // if (droppedFile) {
             //   setFile(droppedFile);
@@ -164,24 +216,25 @@ localStorage.setItem(
           {/* HIDDEN INPUT */}
           <input
             type="file"
-            accept=".pdf,.csv,.xls,.xlsx,.sql"
+            accept=".csv,.xlsx"
+            // accept=".pdf,.csv,.xls,.xlsx,.sql"
             className="hidden"
             id="fileUpload"
             onChange={(e) => {
-  const selected = e.target.files?.[0];
+              const selected = e.target.files?.[0];
 
-  if (selected) {
-    handleFileSelect(selected);
-  }
-}}
-            // onChange={(e) => {
-            //   const selected = e.target.files?.[0];
+              if (selected) {
+                handleFileSelect(selected);
+              }
+            }}
+          // onChange={(e) => {
+          //   const selected = e.target.files?.[0];
 
-            //   if (selected) {
-            //     setFile(selected);
-            //     setStatus("uploaded");
-            //   }
-            // }}
+          //   if (selected) {
+          //     setFile(selected);
+          //     setStatus("uploaded");
+          //   }
+          // }}
           />
 
           {/* ICON */}
@@ -327,8 +380,8 @@ localStorage.setItem(
 
           {/* SUBMIT BUTTON */}
           <button
-          
-  onClick={() => setShowPreview(true)}
+
+            onClick={() => setShowPreview(true)}
             // onClick={handleSubmit}
             className="
               w-full
@@ -349,15 +402,15 @@ localStorage.setItem(
       )}
 
       {showPreview && (
-  <PreviewModal
-    data={previewData}
-    onClose={() => setShowPreview(false)}
-    onNext={async () => {
-      setShowPreview(false);
-      await handleSubmit();
-    }}
-  />
-)}
+        <PreviewModal
+          data={previewData}
+          onClose={() => setShowPreview(false)}
+          onNext={async () => {
+            setShowPreview(false);
+            await handleSubmit();
+          }}
+        />
+      )}
 
       {/* ================= PROCESSING MODAL ================= */}
       {status === "processing" && <ProcessingModal />}
@@ -390,289 +443,442 @@ function PreviewModal({
       />
 
       {/* MODAL */}
-      <div
-        className="
-          relative
-          w-full
-          max-w-5xl
-          h-[600px]
-          overflow-scroll
-          bg-[var(--card)]
-          border border-[var(--border)]
-          rounded-[32px]
-          shadow-2xl
-
-        "
-      >
+     <div
+  className="
+    relative
+    w-full
+    max-w-5xl
+    h-[630px]
+    bg-[var(--card)]
+    border border-[var(--border)]
+    rounded-[32px]
+    shadow-2xl
+    overflow-hidden
+  "
+>
 
         {/* HEADER */}
-        <div className="border-b border-[var(--border)] px-8 py-6">
 
-          <div className="flex items-center justify-between">
+{/* HEADER */}
+<div className="relative overflow-hidden border-b border-[var(--border)]">
 
-            <div>
-              <h2 className="text-2xl font-bold text-[var(--foreground)]">
-                Verify Uploaded Data
-              </h2>
+  {/* Background Gradient */}
+  <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800" />
 
-              <p className="text-sm text-[var(--foreground)]/60 mt-1">
-                Review your Excel file before proceeding to blockchain matching
-              </p>
-            </div>
+  <div className="relative px-8 py-7">
 
-            <div
-              className="
-                h-14 w-14
-                rounded-2xl
-                bg-blue-100
-                dark:bg-blue-900/30
-                flex items-center justify-center
-                text-blue-600
-                text-xl
-                font-bold
-              "
-            >
-              📄
-            </div>
+    {/* Close Button */}
+    <button
+      onClick={onClose}
+      className="
+        absolute
+        top-6
+        right-6
+        w-10 h-10
+        rounded-xl
+        bg-white
+        dark:bg-slate-800
+        border border-[var(--border)]
+        flex items-center justify-center
+        hover:scale-105
+        transition-all
+        shadow-sm
+        cursor-pointer
+      "
+    >
+      <X size={18} />
+    </button>
 
-          </div>
+    <div className="flex items-center gap-5">
 
-        </div>
+      <div
+        className="
+          h-16 w-16
+          rounded-3xl
+          bg-blue-100
+          dark:bg-blue-900/30
+          flex items-center justify-center
+          text-3xl
+        "
+      >
+        📄
+      </div>
+
+      <div>
+        <h2 className="text-2xl font-bold text-[var(--foreground)]">
+          Verify Uploaded Data
+        </h2>
+
+        <p className="text-[15px] text-[var(--foreground)]/60 mt-1">
+          Review your Excel file before proceeding to blockchain matching
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 
         {/* BODY */}
-        <div className="p-8">
-
+{/* BODY */}
+<div
+  className="
+    p-4
+    h-[420px]
+    overflow-y-auto
+    overflow-x-hidden
+    hide-scrollbar
+  "
+>
           {/* STATS */}
-<div className="grid grid-cols-3 gap-3 mb-6">
+         <div className="grid grid-cols-3 gap-5 mb-8">
 
-            <div className="rounded-2xl border border-[var(--border)] p-4 bg-[var(--background)]">
+  <div className="rounded-[28px] p-6 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-100">
 
-              <p className="text-xs text-[var(--foreground)]/60">
-                Total Records
-              </p>
+    <div className="flex justify-between items-center">
 
-              <h3 className="text-3xl font-bold mt-2 text-[var(--foreground)]">
-                {data.length}
-              </h3>
+      <div>
+        <p className="text-sm text-slate-500">
+          Total Records
+        </p>
 
-            </div>
+        <h3 className="text-4xl font-bold text-blue-700 mt-3">
+          {data.length}
+        </h3>
+      </div>
 
-            <div className="rounded-2xl border border-[var(--border)] p-5 bg-[var(--background)]">
+      <div className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center text-3xl">
+        📊
+      </div>
 
-              <p className="text-xs text-[var(--foreground)]/60">
-                Columns Found
-              </p>
+    </div>
 
-              <h3 className="text-3xl font-bold mt-2 text-[var(--foreground)]">
-                {columns.length}
-              </h3>
+  </div>
 
-            </div>
+  <div className="rounded-[28px] p-6 bg-gradient-to-br from-green-50 to-green-100 border border-green-100">
 
-            <div className="rounded-2xl border border-[var(--border)] p-5 bg-[var(--background)]">
+    <div className="flex justify-between items-center">
 
-              <p className="text-xs text-[var(--foreground)]/60">
-                Preview Rows
-              </p>
+      <div>
+        <p className="text-sm text-slate-500">
+          Columns Found
+        </p>
 
-              <h3 className="text-3xl font-bold mt-2 text-[var(--foreground)]">
-                {Math.min(data.length, 10)}
-              </h3>
+        <h3 className="text-4xl font-bold text-green-700 mt-3">
+          {columns.length}
+        </h3>
+      </div>
 
-            </div>
+      <div className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center text-3xl">
+        🏷️
+      </div>
 
-          </div>
+    </div>
+
+  </div>
+
+  <div className="rounded-[28px] p-6 bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-100">
+
+    <div className="flex justify-between items-center">
+
+      <div>
+        <p className="text-sm text-slate-500">
+          Preview Rows
+        </p>
+
+        <h3 className="text-4xl font-bold text-purple-700 mt-3">
+          {Math.min(data.length, 10)}
+        </h3>
+      </div>
+
+      <div className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center text-3xl">
+        👁️
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 
           {/* COLUMN TAGS */}
-          <div className="mb-6">
+         {/* DETECTED COLUMNS */}
+<div className="mb-8">
 
-            <h4 className="font-semibold text-[var(--foreground)] mb-3">
-              Detected Columns
-            </h4>
+  <div className="flex items-center justify-between mb-4">
 
-            <div className="flex flex-wrap gap-2">
+    <h4 className="text-lg font-semibold text-[var(--foreground)]">
+      Detected Columns
+    </h4>
 
-              {columns.map((column) => (
+    <div className="px-4 py-2 rounded-xl bg-blue-50 text-blue-700 text-sm font-medium">
+      {columns.length} Columns
+    </div>
 
-                <span
-                  key={column}
-                  className="
-                    px-3 py-1.5
-                    rounded-full
-                    text-xs
-                    font-medium
-                    bg-blue-50
-                    dark:bg-blue-900/20
-                    text-blue-700
-                    dark:text-blue-300
-                    border border-blue-200
-                    dark:border-blue-800
-                  "
-                >
-                  {column}
-                </span>
+  </div>
 
-              ))}
+  <div className="flex flex-wrap gap-3">
 
-            </div>
+    {columns.map((column) => (
 
-          </div>
+      <span
+        key={column}
+        className="
+          px-4 py-2
+          rounded-2xl
+          text-sm
+          font-medium
+          bg-gradient-to-r
+          from-blue-50
+          to-blue-100
+          text-blue-700
+          border border-blue-200
+          shadow-sm
+          hover:shadow-md
+          transition-all
+        "
+      >
+        {column}
+      </span>
 
-          {/* TABLE */}
-          <div
+    ))}
+
+  </div>
+
+</div>
+
+{/* TABLE SECTION */}
+<div
+  className="
+    rounded-[30px]
+    overflow-hidden
+    border border-[var(--border)]
+    bg-white
+    dark:bg-slate-900
+    shadow-sm
+  "
+>
+
+  {/* TABLE HEADER */}
+  <div
+    className="
+      px-6 py-5
+      border-b border-[var(--border)]
+      bg-gradient-to-r
+      from-slate-50
+      to-blue-50
+      dark:from-slate-800
+      dark:to-slate-900
+    "
+  >
+
+    <div className="flex items-center justify-between">
+
+      <div>
+
+        <h3 className="text-lg font-semibold text-[var(--foreground)]">
+          Excel Data Preview
+        </h3>
+
+        <p className="text-sm text-[var(--foreground)]/60 mt-1">
+          Preview first {data.length} records
+        </p>
+
+      </div>
+
+      <div
+        className="
+          h-12 w-12
+          rounded-2xl
+          bg-white
+          dark:bg-slate-800
+          shadow-sm
+          flex items-center justify-center
+          text-xl
+        "
+      >
+        📊
+      </div>
+
+    </div>
+
+  </div>
+
+  {/* TABLE */}
+  <div
+    className="
+      overflow-auto
+      max-h-[380px]
+      hide-scrollbar
+    "
+  >
+
+    <table className="w-full">
+
+      <thead className="sticky top-0 z-20 bg-white dark:bg-slate-900">
+
+        <tr>
+
+          {columns.map((key) => (
+
+            <th
+              key={key}
+              className="
+                px-5 py-4
+                text-left
+                text-xs
+                uppercase
+                tracking-widest
+                font-bold
+                text-slate-600
+                border-b
+                whitespace-nowrap
+              "
+            >
+              {key}
+            </th>
+
+          ))}
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        {data.map((row, index) => (
+
+          <tr
+            key={index}
             className="
-              border border-[var(--border)]
-              rounded-2xl
-              overflow-hidden
-              bg-[var(--background)]
+              hover:bg-blue-50/40
+              dark:hover:bg-slate-800/40
+              transition-colors
             "
           >
 
-            <div className="px-5 py-4 border-b border-[var(--border)]">
+            {columns.map((column) => (
 
-              <h3 className="font-semibold text-[var(--foreground)]">
-                Excel Data Preview
-              </h3>
+              <td
+                key={column}
+                className="
+                  px-5 py-4
+                  text-sm
+                  border-b
+                  border-[var(--border)]
+                  whitespace-nowrap
+                "
+              >
+                {String(row[column] ?? "-")}
+              </td>
 
-            </div>
+            ))}
 
-<div
-  className="
-    overflow-auto
-    h-[350px]
-    max-w-full 
-  "
->
-              <table className="w-full">
+          </tr>
 
-                <thead className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-10">
+        ))}
 
-                  <tr>
+      </tbody>
 
-                    {columns.map((key) => (
+    </table>
 
-                      <th
-                        key={key}
-                        className="
-                          px-4 py-4
-                          text-left
-                          text-xs
-                          uppercase
-                          tracking-wider
-                          font-semibold
-                          whitespace-nowrap
-                          border-b
-                        "
-                      >
-                        {key}
-                      </th>
+  </div>
 
-                    ))}
-
-                  </tr>
-
-                </thead>
-
-                <tbody>
-
-                  {data
-                    
-                    .map((row, index) => (
-
-                      <tr
-                        key={index}
-                        className="
-                          hover:bg-slate-50
-                          dark:hover:bg-slate-800/40
-                        "
-                      >
-
-                        {columns.map((column) => (
-
-                          <td
-                            key={column}
-                            className="
-                              px-4 py-3
-                              text-sm
-                              border-b
-                              border-[var(--border)]
-                              whitespace-nowrap
-                            "
-                          >
-                            {String(
-                              row[column] ?? "-"
-                            )}
-                          </td>
-
-                        ))}
-
-                      </tr>
-
-                    ))}
-
-                </tbody>
-
-              </table>
-
-            </div>
-
-          </div>
+</div>
 
         </div>
 
         {/* FOOTER */}
-        <div
-          className="
-            border-t border-[var(--border)]
-            px-8 py-5
-            flex items-center justify-between
-          "
-        >
+      <div
+  className="
+    border-t border-[var(--border)]
+    bg-gradient-to-r
+    from-slate-50
+    via-white
+    to-blue-50
+    dark:from-slate-900
+    dark:via-slate-900
+    dark:to-slate-800
+     px-6 py-4
+    flex items-center justify-between
+  "
+>
 
-          <div className="text-sm text-[var(--foreground)]/60">
-            Please verify that the uploaded data is correct before continuing.
-          </div>
+  {/* LEFT */}
+  <div className="flex items-center gap-3">
 
-          <div className="flex gap-3">
+    <div
+      className="
+        h-10 w-10
+        rounded-2xl
+        bg-blue-100
+        dark:bg-blue-900/30
+        flex items-center justify-center
+      "
+    >
+      ✅
+    </div>
 
-            <button
-              onClick={onClose}
-              className="
-                px-6 py-3
-                rounded-xl
-                border border-[var(--border)]
-                bg-[var(--card)]
-                hover:bg-slate-50
-                dark:hover:bg-slate-800
-                transition-all
-                font-medium
-                cursor-pointer
-              "
-            >
-              Upload Different File
-            </button>
+    <div>
+      <p className="font-medium text-[var(--foreground)]">
+        Data Verification Complete
+      </p>
 
-            <button
-              onClick={onNext}
-              className="
-                px-6 py-3
-                rounded-xl
-                bg-blue-600
-                hover:bg-blue-700
-                text-white
-                font-medium
-                shadow-lg
-                transition-all
-                                cursor-pointer
+      <p className="text-sm text-[var(--foreground)]/60">
+        Please verify the uploaded data before continuing.
+      </p>
+    </div>
 
-              "
-            >
-              Confirm & Continue →
-            </button>
+  </div>
 
-          </div>
+  {/* RIGHT */}
+  <div className="flex items-center gap-3">
 
-        </div>
+    <button
+      onClick={onClose}
+      className="
+        px-6 py-3
+        rounded-2xl
+        bg-white
+        dark:bg-slate-800
+        border border-[var(--border)]
+        font-medium
+        shadow-sm
+        hover:shadow-md
+        hover:-translate-y-0.5
+        transition-all
+        cursor-pointer
+      "
+    >
+      Upload Different File
+    </button>
+
+    <button
+      onClick={onNext}
+      className="
+        px-7 py-3
+        rounded-2xl
+        bg-gradient-to-r
+        from-blue-600
+        to-blue-700
+        hover:from-blue-700
+        hover:to-blue-800
+        text-white
+        font-semibold
+        shadow-lg
+        hover:shadow-xl
+        hover:-translate-y-0.5
+        transition-all
+        cursor-pointer
+      "
+    >
+      Confirm & Continue →
+    </button>
+
+  </div>
+
+</div>
 
       </div>
 

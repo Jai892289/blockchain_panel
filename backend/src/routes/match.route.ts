@@ -1,9 +1,9 @@
 import express from "express";
-import { startMatching, getMatchReports, getDashboardStats } from "../controllers/match.controller";
+import { createBlockchainRecord, getMatchReports, getDashboardStats } from "../controllers/match.controller";
 
 const router = express.Router();
 
-router.post("/match", startMatching);
+router.post("/match", createBlockchainRecord);
 router.get("/match-report", getMatchReports);
 router.get("/dashboard/stats", getDashboardStats);
 

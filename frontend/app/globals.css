@@ -80,3 +80,15 @@ body {
 * {
   transition: background-color 0.25s ease, color 0.25s ease;
 }
+
+
+.hide-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}

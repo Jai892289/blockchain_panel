@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 
 export default function MatchDataFlow() {
@@ -26,7 +27,7 @@ export default function MatchDataFlow() {
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const [selected, setSelected] = useState<string[]>([]);
+const [selected, setSelected] = useState<string[]>(["All"]);
 
   const [fromDate, setFromDate] = useState("");
 
@@ -81,78 +82,176 @@ export default function MatchDataFlow() {
     const parsed = JSON.parse(stored);
 
     setUploadedData(parsed);
+    setOptions(["All"]);
 
-    const rows = parsed?.data || [];
-
-    const firstRow = Array.isArray(rows)
-      ? rows[0]
-      : null;
-
-      setOptions(["All"]);
-
-    // if (firstRow && typeof firstRow === "object") {
-    //   setOptions([
-    //     "All",
-    //     ...Object.keys(firstRow),
-    //   ]);
-    // }
-
-    console.log("UPLOADED DATA", parsed);
-    console.log("FIRST ROW", firstRow);
+    // Auto-select All
+    setSelected(["All"]);
   }
 }, []);
 
-//   useEffect(() => {
-//     const stored = 
-//     localStorage.getItem("uploadedData");
 
-//     if (stored) {
-//       const parsed = JSON.parse(stored);
+const handleCreate = async () => {
+  try {
+    setLoading(true);
 
-//       setUploadedData(parsed);
+    const payload = {
+      action: "create",
 
-//       // Get column names dynamically
-//       // const firstRow = parsed?.data?.[0];
+      uploadedData: filteredData,
 
-//       const rows = parsed?.data || parsed;
+      selectedFields: selectedColumns,
 
-// const firstRow = Array.isArray(rows)
-//   ? rows[0]
-//   : null;
+      format,
 
-// if (firstRow && typeof firstRow === "object") {
-//   setOptions([
-//     "All",
-//     ...Object.keys(firstRow),
-//   ]);
-// }
+      fromDate,
 
-//       console.log("UPLOADED DATA", parsed);
-// console.log("FIRST ROW", parsed?.data?.[0]);
+      toDate,
+    };
 
-//       // if (firstRow) {
-//       //   setOptions([
-//       //     "All",
-//       //     ...Object.keys(firstRow),
-//       //   ]);
-//       // }
-//     }
-//   }, []);
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/match`,
+      {
+        method: "POST",
 
-  // useEffect(() => {
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
 
-  //   const stored = localStorage.getItem("uploadedData");
+        body: JSON.stringify(payload),
+      }
+    );
 
-  //   if (stored) {
+    const data =
+      await response.json();
 
-  //     const parsed = JSON.parse(stored);
+    // Duplicate Data
+    if (
+      response.status === 409
+    ) {
+      alert(
+        "Data already exists on blockchain"
+      );
 
-  //     console.log(parsed);
+      return;
+    }
 
-  //     setUploadedData(parsed);
-  //   }
+    if (!response.ok) {
+      throw new Error(
+        data.message
+      );
+    }
 
-  // }, []);
+   console.log(
+  "CREATE SUCCESS",
+  data
+);
+
+sessionStorage.setItem(
+  "matchReport",
+  JSON.stringify(data.data)
+);
+
+toast.success(
+  "Records successfully stored on blockchain"
+);
+
+router.push(
+  "/dashboard/report"
+);
+
+  } catch (error: any) {
+    console.log(error);
+
+    alert(
+      error.message ||
+        "Create failed"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
+const handleStartMatching =
+  async () => {
+    try {
+      setLoading(true);
+
+      const payload = {
+        action: "verify",
+
+        uploadedData:
+          filteredData,
+
+        selectedFields:
+          selectedColumns,
+
+        format,
+
+        fromDate,
+
+        toDate,
+      };
+
+      const response =
+        await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/match`,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify(
+              payload
+            ),
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (
+        !response.ok
+      ) {
+        throw new Error(
+          data.message
+        );
+      }
+
+      console.log(
+        "VERIFY SUCCESS",
+        data
+      );
+
+      sessionStorage.setItem(
+        "matchReport",
+        JSON.stringify(
+          data.data
+        )
+      );
+
+      router.push(
+        "/dashboard/report"
+      );
+
+    } catch (error: any) {
+
+      console.log(error);
+
+      alert(
+        error.message ||
+          "Verification failed"
+      );
+
+    } finally {
+
+      setLoading(false);
+
+    }
+  };
 
   // =========================================
   // CLOSE DROPDOWN OUTSIDE
@@ -241,69 +340,69 @@ const filteredData =
     return filteredRow;
   });
 
-  const handleStartMatching = async () => {
+//   const handleStartMatching = async () => {
 
-    try {
+//     try {
 
-      setLoading(true);
+//       setLoading(true);
 
-      const payload = {
-  uploadedData: filteredData,
-  selectedFields: selectedColumns,
-  format,
-  fromDate,
-  toDate,
-};
+//       const payload = {
+//   uploadedData: filteredData,
+//   selectedFields: selectedColumns,
+//   format,
+//   fromDate,
+//   toDate,
+// };
 
-      // const payload = {
-      //   uploadedData,
-      //   selectedFields: selected,
-      //   format,
-      //   fromDate,
-      //   toDate,
-      // };
+//       // const payload = {
+//       //   uploadedData,
+//       //   selectedFields: selected,
+//       //   format,
+//       //   fromDate,
+//       //   toDate,
+//       // };
 
-      console.log(payload);
+//       console.log(payload);
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/match`,
-        {
-          method: "POST",
+//       const response = await fetch(
+//         `${process.env.NEXT_PUBLIC_API_BASE_URL}/match`,
+//         {
+//           method: "POST",
 
-          headers: {
-            "Content-Type": "application/json",
-          },
+//           headers: {
+//             "Content-Type": "application/json",
+//           },
 
-          body: JSON.stringify(payload),
-        }
-      );
+//           body: JSON.stringify(payload),
+//         }
+//       );
 
-      const data = await response.json();
+//       const data = await response.json();
 
-      console.log(data);
+//       console.log(data);
 
-      let value = 0;
+//       let value = 0;
 
-      const interval = setInterval(() => {
+//       const interval = setInterval(() => {
 
-        value += 10;
+//         value += 10;
 
-        setProgress(value);
+//         setProgress(value);
 
-        if (value >= 100) {
+//         if (value >= 100) {
 
-          clearInterval(interval);
+//           clearInterval(interval);
 
-          router.push("/dashboard/report");
-        }
+//           router.push("/dashboard/report");
+//         }
 
-      }, 400);
+//       }, 400);
 
-    } catch (error) {
+//     } catch (error) {
 
-      console.log(error);
-    }
-  };
+//       console.log(error);
+//     }
+//   };
 
   // =========================================
   // LOADING SCREEN
@@ -445,9 +544,12 @@ const filteredData =
 
                   <span className="text-gray-400 text-sm">
                     <span className="text-gray-400 text-sm">
-  {selected.length === 0
+                      {selected.includes("All")
+  ? "All"
+  : selected.join(", ")}
+  {/* {selected.length === 0
     ? "-Please Select-"
-    : "All"}
+    : "All"} */}
 </span>
                     {/* {selected.length === 0
                       ? "-Please Select-"
@@ -608,59 +710,81 @@ const filteredData =
           )}
 
           {/* BUTTONS */}
-          <div className="flex justify-center gap-4 mt-6">
-            <button
-  onClick={() => {
-    if (step === 1) {
-      router.back(); // go to previous page
-    } else {
-      setStep((s) => s - 1);
-    }
-  }}
-  className="w-62 py-3 border border-blue-500 text-blue-500 rounded-lg cursor-pointer"
->
-  ← Back
-</button>
+     <div className="flex justify-center gap-4 mt-6">
 
-            {/* <button
-              disabled={step === 1}
-              onClick={() => setStep((s) => s - 1)}
-              className="w-62 py-3 border border-blue-500 text-blue-500 rounded-lg cursor-pointer"
-            >
-              ← Back 
-            </button> */}
+  <button
+    disabled={loading}
+    onClick={() => {
+      if (step === 1) {
+        router.back();
+      } else {
+        setStep((s) => s - 1);
+      }
+    }}
+    className="
+      px-10 py-3
+      border border-blue-500
+      text-blue-500
+      rounded-xl
+      cursor-pointer
+      disabled:opacity-50
+    "
+  >
+    ← Back
+  </button>
 
-            <button
-              onClick={() => {
+  {step === 3 && (
+    <button
+      disabled={loading}
+      onClick={handleCreate}
+      className="
+        px-10 py-3
+        bg-red-600
+        hover:bg-red-700
+        text-white
+        rounded-xl
+        font-medium
+        shadow-md
+        transition-all
+        cursor-pointer
+        disabled:opacity-50
+      "
+    >
+      {loading ? "Creating..." : "Create →"}
+    </button>
+  )}
 
-                if (step === 3) {
+  <button
+    disabled={loading}
+    onClick={() => {
+      if (step === 3) {
+        handleStartMatching();
+      } else if (step === 1) {
+        setShowPreview(true);
+      } else {
+        setStep((s) => s + 1);
+      }
+    }}
+    className="
+      px-10 py-3
+      bg-blue-600
+      hover:bg-blue-700
+      text-white
+      rounded-xl
+      font-medium
+      cursor-pointer
+      disabled:opacity-50
+    "
+  >
+    {step === 3
+      ? loading
+        ? "Matching..."
+        : "Start Matching →"
+      : "Next →"}
+  </button>
 
-                  handleStartMatching();
+</div>
 
-                } else {
-
-                  if (step === 1) {
-                    if (selected.length === 0) {
-                      alert(
-                        "Please select at least one field"
-                      );
-                      return;
-                    }
-
-                    setShowPreview(true);
-                  } else {
-                    setStep((s) => s + 1);
-                  }
-
-                  // setStep((s) => s + 1);
-                }
-              }}
-              className="w-62 py-3 bg-blue-600 text-white rounded-lg cursor-pointer"
-            >
-              {step === 3 ? "Start Matching →" : "Next →"}
-            </button>
-
-          </div>
         </div>
       </div>
       {showPreview && (
@@ -712,57 +836,91 @@ function PreviewModal({
       />
 
       {/* MODAL */}
-      <div
-        className="
-          relative
-          w-full
-          max-w-6xl
-          bg-[var(--card)]
-          border border-[var(--border)]
-          rounded-[32px]
-          shadow-2xl
-          overflow-scroll
-          h-[600px]
-        "
-      >
+  <div
+  className="
+    relative
+    w-full
+    max-w-5xl
+    h-[630px]
+    bg-[var(--card)]
+    border border-[var(--border)]
+    rounded-[32px]
+    shadow-2xl
+    overflow-hidden
+  "
+>
 
         {/* HEADER */}
-        <div className="px-8 py-6 border-b border-[var(--border)]">
+      <div className="relative overflow-hidden border-b border-[var(--border)]">
 
-          <div className="flex items-center justify-between">
+  <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800" />
 
-            <div>
-              <h2 className="text-2xl font-bold text-[var(--foreground)]">
-                Verify Matching Configuration
-              </h2>
+  <div className="relative px-8 py-7">
 
-              <p className="text-sm text-[var(--foreground)]/60 mt-1">
-                Review selected fields before starting blockchain verification
-              </p>
-            </div>
+    <button
+      onClick={onClose}
+      className="
+        absolute
+        top-6
+        right-6
+        w-10 h-10
+        rounded-xl
+        bg-white
+        dark:bg-slate-800
+        border border-[var(--border)]
+        flex items-center justify-center
+        hover:scale-105
+        transition-all
+        shadow-sm
+        cursor-pointer
+      "
+    >
+      ✕
+    </button>
 
-            <div
-              className="
-                w-14 h-14
-                rounded-2xl
-                bg-blue-100
-                dark:bg-blue-900/30
-                flex items-center justify-center
-                text-blue-600
-                text-2xl
-                font-bold
-              "
-            >
-              ✓
-            </div>
+    <div className="flex items-center gap-5">
 
-          </div>
+      <div
+        className="
+          h-16 w-16
+          rounded-3xl
+          bg-blue-100
+          dark:bg-blue-900/30
+          flex items-center justify-center
+          text-3xl
+        "
+      >
+        ✓
+      </div>
 
-        </div>
+      <div>
+
+        <h2 className="text-2xl font-bold text-[var(--foreground)]">
+          Verify Matching Configuration
+        </h2>
+
+        <p className="text-[15px] text-[var(--foreground)]/60 mt-1">
+          Review selected fields before proceeding to blockchain matching
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 
         {/* BODY */}
-        <div className="p-8">
-
+<div
+  className="
+    p-4
+    h-[420px]
+    overflow-y-auto
+    overflow-x-hidden
+    hide-scrollbar
+  "
+>
           {/* SELECTED FIELDS */}
           <div className="mb-8">
 
@@ -799,216 +957,292 @@ function PreviewModal({
           </div>
 
           {/* STATS */}
-          <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-3 gap-5 mb-8">
 
-            <div
-              className="
-                rounded-2xl
-                border border-[var(--border)]
-                bg-[var(--background)]
-                p-5
-              "
-            >
-              <p className="text-xs text-gray-500">
-                Selected Fields
-              </p>
+  <div className="rounded-[28px] p-6 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-100">
 
-              <h3 className="text-3xl font-bold mt-2 text-[var(--foreground)]">
-                {selectedFields.length}
-              </h3>
-            </div>
+    <div className="flex justify-between items-center">
 
-            <div
-              className="
-                rounded-2xl
-                border border-[var(--border)]
-                bg-[var(--background)]
-                p-5
-              "
-            >
-              <p className="text-xs text-gray-500">
-                Preview Records
-              </p>
+      <div>
+        <p className="text-sm text-slate-500">
+          Selected Fields
+        </p>
 
-              <h3 className="text-3xl font-bold mt-2 text-[var(--foreground)]">
-                {previewRows.length}
-              </h3>
-            </div>
+        <h3 className="text-4xl font-bold text-blue-700 mt-3">
+          {selectedFields.length}
+        </h3>
+      </div>
 
-            <div
-              className="
-                rounded-2xl
-                border border-[var(--border)]
-                bg-[var(--background)]
-                p-5
-              "
-            >
-              <p className="text-xs text-gray-500">
-                Total Records
-              </p>
+      <div className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center text-3xl">
+        🏷️
+      </div>
 
-              <h3 className="text-3xl font-bold mt-2 text-[var(--foreground)]">
-                {uploadedData?.data?.length || 0}
-              </h3>
-            </div>
+    </div>
 
-          </div>
+  </div>
+
+  <div className="rounded-[28px] p-6 bg-gradient-to-br from-green-50 to-green-100 border border-green-100">
+
+    <div className="flex justify-between items-center">
+
+      <div>
+        <p className="text-sm text-slate-500">
+          Preview Records
+        </p>
+
+        <h3 className="text-4xl font-bold text-green-700 mt-3">
+          {previewRows.length}
+        </h3>
+      </div>
+
+      <div className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center text-3xl">
+        👁️
+      </div>
+
+    </div>
+
+  </div>
+
+  <div className="rounded-[28px] p-6 bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-100">
+
+    <div className="flex justify-between items-center">
+
+      <div>
+        <p className="text-sm text-slate-500">
+          Total Records
+        </p>
+
+        <h3 className="text-4xl font-bold text-purple-700 mt-3">
+          {uploadedData?.data?.length || 0}
+        </h3>
+      </div>
+
+      <div className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center text-3xl">
+        📊
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 
           {/* TABLE */}
-          <div
-            className="
-              border border-[var(--border)]
-              rounded-2xl
-              overflow-hidden
-              bg-[var(--background)]
-            "
-          >
+        {/* TABLE SECTION */}
+<div
+  className="
+    rounded-[30px]
+    overflow-hidden
+    border border-[var(--border)]
+    bg-white
+    dark:bg-slate-900
+    shadow-sm
+  "
+>
 
-            <div className="px-5 py-4 border-b border-[var(--border)]">
-              <h3 className="font-semibold text-[var(--foreground)]">
-                Data Preview 
-              </h3>
-            </div>
+  {/* TABLE HEADER */}
+  <div
+    className="
+      px-6 py-5
+      border-b border-[var(--border)]
+      bg-gradient-to-r
+      from-slate-50
+      to-blue-50
+      dark:from-slate-800
+      dark:to-slate-900
+    "
+  >
 
-            <div className="overflow-auto max-h-[420px]">
+    <div className="flex items-center justify-between">
 
-              <table className="w-full">
+      <div>
 
-                <thead className="bg-slate-50 dark:bg-slate-800">
+        <h3 className="text-lg font-semibold text-[var(--foreground)]">
+          Data Preview
+        </h3>
 
-                  <tr>
+        <p className="text-sm text-[var(--foreground)]/60 mt-1">
+          Preview uploaded records before blockchain matching
+        </p>
 
-                    {selectedFields.map(
-                      (field: string) => (
+      </div>
 
-                        <th
-                          key={field}
-                          className="
-                            px-4 py-4
-                            text-left
-                            text-xs
-                            uppercase
-                            tracking-wider
-                            font-semibold
-                            whitespace-nowrap
-                          "
-                        >
-                          {field}
-                        </th>
+      <div
+        className="
+          h-12 w-12
+          rounded-2xl
+          bg-white
+          dark:bg-slate-800
+          shadow-sm
+          flex items-center justify-center
+          text-xl
+        "
+      >
+        📊
+      </div>
 
-                      )
+    </div>
+
+  </div>
+
+  {/* TABLE */}
+  <div
+    className="
+      overflow-auto
+      max-h-[420px]
+      hide-scrollbar
+    "
+  >
+
+    <table className="w-full">
+
+      <thead className="sticky top-0 z-20 bg-white dark:bg-slate-900">
+
+        <tr>
+
+          {selectedFields.map((field: string) => (
+
+            <th
+              key={field}
+              className="
+                px-5 py-4
+                text-left
+                text-xs
+                uppercase
+                tracking-widest
+                font-bold
+                text-slate-600
+                border-b
+                border-[var(--border)]
+                whitespace-nowrap
+              "
+            >
+              {field}
+            </th>
+
+          ))}
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        {previewRows.map(
+          (row: any, index: number) => (
+
+            <tr
+              key={index}
+              className="
+                hover:bg-blue-50/40
+                dark:hover:bg-slate-800/40
+                transition-colors
+              "
+            >
+
+              {selectedFields.map(
+                (field: string) => (
+
+                  <td
+                    key={field}
+                    className="
+                      px-5 py-4
+                      text-sm
+                      border-b
+                      border-[var(--border)]
+                      whitespace-nowrap
+                    "
+                  >
+                    {String(
+                      row[field] ?? "-"
                     )}
+                  </td>
 
-                  </tr>
+                )
+              )}
 
-                </thead>
+            </tr>
 
-                <tbody>
+          )
+        )}
 
-                  {previewRows.map(
-                    (
-                      row: any,
-                      index: number
-                    ) => (
+      </tbody>
 
-                      <tr
-                        key={index}
-                        className="hover:bg-slate-50 dark:hover:bg-slate-800/40"
-                      >
+    </table>
 
-                        {selectedFields.map(
-                          (field: string) => (
+  </div>
 
-                            <td
-                              key={field}
-                              className="
-                                px-4 py-3
-                                border-b
-                                border-[var(--border)]
-                                text-sm
-                                whitespace-nowrap
-                              "
-                            >
-                              {String(
-                                row[field] ?? "-"
-                              )}
-                            </td>
-
-                          )
-                        )}
-
-                      </tr>
-
-                    )
-                  )}
-
-                </tbody>
-
-              </table>
-
-            </div>
-
-          </div>
+</div>
 
         </div>
 
         {/* FOOTER */}
-        <div
-          className="
-            flex
-            items-center
-            justify-between
-            border-t
-            border-[var(--border)]
-            px-8
-            py-5
-          "
-        >
+       <div
+  className="
+    border-t border-[var(--border)]
+    bg-gradient-to-r
+    from-slate-50
+    via-white
+    to-blue-50
+    dark:from-slate-900
+    dark:via-slate-900
+    dark:to-slate-800
+    px-6 py-4
+    flex items-center justify-between
+  "
+>
 
-          <div className="text-sm text-[var(--foreground)]/60">
-            Please verify the selected columns before continuing with blockchain matching.
-          </div>
+  <div className="flex items-center gap-3">
 
-          <div className="flex gap-3">
-{/* 
-            <button
-              onClick={onClose}
-              className="
-                px-6 py-3
-                rounded-xl
-                border border-[var(--border)]
-                bg-[var(--card)]
-                hover:bg-slate-50
-                dark:hover:bg-slate-800
-                transition-all
-                font-medium
-                cursor-pointer
-              "
-            >
-              Edit Selection
-            </button> */}
+    <div
+      className="
+        h-10 w-10
+        rounded-2xl
+        bg-blue-100
+        dark:bg-blue-900/30
+        flex items-center justify-center
+      "
+    >
+      ✅
+    </div>
 
-            <button
-              onClick={onConfirm}
-              className="
-                px-6 py-3
-                rounded-xl
-                bg-blue-600
-                hover:bg-blue-700
-                text-white
-                font-medium
-                shadow-lg
-                transition-all
-                                cursor-pointer
+    <div>
 
-              "
-            >
-              Confirm & Continue →
-            </button>
+      <p className="font-medium text-[var(--foreground)]">
+        Matching Configuration Ready
+      </p>
 
-          </div>
+      <p className="text-sm text-[var(--foreground)]/60">
+        Verify selected fields before blockchain matching.
+      </p>
 
-        </div>
+    </div>
+
+  </div>
+
+  <button
+    onClick={onConfirm}
+    className="
+      px-7 py-3
+      rounded-2xl
+      bg-gradient-to-r
+      from-blue-600
+      to-blue-700
+      hover:from-blue-700
+      hover:to-blue-800
+      text-white
+      font-semibold
+      shadow-lg
+      hover:shadow-xl
+      hover:-translate-y-0.5
+      transition-all
+      cursor-pointer
+    "
+  >
+    Confirm & Continue →
+  </button>
+
+</div>
 
       </div>
 
